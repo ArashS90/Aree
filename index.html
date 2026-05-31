@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Jigar Tunnel | فروشگاه</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        }
+        body {
+            background: var(--tg-theme-bg-color, #f8fafc);
+            color: var(--tg-theme-text-color, #0f172a);
+            direction: rtl;
+            padding: 16px;
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 20px;
+        }
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 32px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.5);
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .header {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: white;
+            text-align: center;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+        /* تریم خاص پشت اسم فروشگاه */
+        .shop-title {
+            display: inline-block;
+            background: linear-gradient(90deg, #ffd89b, #c7e9fb);
+            background-size: 200% auto;
+            color: #1e293b;
+            padding: 0.2em 0.8em;
+            border-radius: 60px;
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            box-shadow: 0 0 15px rgba(255,216,155,0.6);
+            animation: shine 3s linear infinite;
+            margin-bottom: 10px;
+        }
+        @keyframes shine {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .product-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .product-info {
+            flex: 2;
+        }
+        .product-price {
+            font-weight: bold;
+            color: #2563eb;
+            font-size: 18px;
+        }
+        .qty-btn {
+            background: #e2e8f0;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 40px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 3px;
+        }
+        .cart-icon {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: #2563eb;
+            color: white;
+            width: 56px;
+            height: 56px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            cursor: pointer;
+            z-index: 1000;
+        }
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            border-radius: 20px;
+            padding: 2px 8px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .cart-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--tg-theme-bg-color, white);
+            border-radius: 32px 32px 0 0;
+            padding: 20px;
+            transform: translateY(100%);
+            transition: transform 0.3s;
+            z-index: 1001;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .cart-panel.open {
+            transform: translateY(0);
+        }
+        .close-cart {
+            float: left;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .checkout-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 40px;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 16px;
+            cursor: pointer;
+        }
+        .support-btn {
+            background: #2563eb;
+        }
+        @media (prefers-color-scheme: dark) {
+            body { background: var(--tg-theme-bg-color, #0f172a); }
+            .card { background: rgba(30,41,59,0.7); border-color: rgba(255,255,255,0.1); }
+            .product-price { color: #60a5fa; }
+            .qty-btn { background: #334155; color: white; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="cartPanel" class="cart-panel">
+    <button class="close-cart" onclick="toggleCart()">✖</button>
+    <h3>🛒 سبد خرید</h3>
+    <div id="cartItems"></div>
+    <div id="cartTotal" style="font-weight: bold; margin-top: 10px;"></div>
+    <button class="checkout-btn" onclick="checkout()">💰 تسویه نهایی</button>
+</div>
+
+<div class="cart-icon" onclick="toggleCart()">
+    🛒
+    <span id="cartCount" class="cart-badge">0</span>
+</div>
+
+<div id="mainContent"></div>
+
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    // محصولات
+    const products = {
+        10: { name: "10 گیگ", price: 120000, icon: "📦" },
+        20: { name: "20 گیگ", price: 240000, icon: "📦" },
+        30: { name: "30 گیگ", price: 360000, icon: "📦" },
+        40: { name: "40 گیگ", price: 480000, icon: "📦" },
+        50: { name: "50 گیگ", price: 600000, icon: "⚡" }
+    };
+
+    let cart = JSON.parse(localStorage.getItem('cart')) || { 10:0, 20:0, 30:0, 40:0, 50:0 };
+    function saveCart() {
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartUI();
+    }
+    function updateCartUI() {
+        let totalItems = Object.values(cart).reduce((a,b)=>a+b,0);
+        document.getElementById('cartCount').innerText = totalItems;
+        renderCartPanel();
+    }
+    function addToCart(plan, qty = 1) {
+        cart[plan] += qty;
+        if (cart[plan] < 0) cart[plan] = 0;
+        saveCart();
+        if (navigator.vibrate) navigator.vibrate(50);
+        let icon = document.querySelector('.cart-icon');
+        gsap.fromTo(icon, { scale: 1 }, { scale: 1.2, duration: 0.2, yoyo: true, repeat: 1 });
+        let qtySpan = document.getElementById(`qty${plan}`);
+        if (qtySpan) qtySpan.innerText = cart[plan];
+    }
+    function renderCartPanel() {
+        let container = document.getElementById('cartItems');
+        let total = 0;
+        for (let p in cart) total += cart[p] * products[p].price;
+        let html = '';
+        if (total === 0) html = '<p>سبد خرید خالی است</p>';
+        else {
+            for (let p in cart) {
+                if (cart[p] > 0) {
+                    html += `<div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                                <span>${products[p].icon} ${products[p].name}</span>
+                                <span>${cart[p]} × ${products[p].price.toLocaleString()} تومان</span>
+                             </div>`;
+                }
+            }
+        }
+        document.getElementById('cartItems').innerHTML = html;
+        document.getElementById('cartTotal').innerHTML = `مجموع: ${total.toLocaleString()} تومان`;
+    }
+    function toggleCart() {
+        document.getElementById('cartPanel').classList.toggle('open');
+    }
+    function checkout() {
+        let totalItems = Object.values(cart).reduce((a,b)=>a+b,0);
+        if (totalItems === 0) {
+            tg.showPopup({ title: "سبد خالی", message: "هیچ محصولی انتخاب نکردید.", buttons: [{ type: "ok" }] });
+            return;
+        }
+        const BOT_USERNAME = "jigartuunelbot";
+        tg.openTelegramLink(`https://t.me/${BOT_USERNAME}?start=cart`);
+        tg.close();
+    }
+    function support() {
+        tg.openTelegramLink(`tg://user?id=7955284547`);
+    }
+
+    function renderProducts() {
+        const container = document.getElementById('mainContent');
+        let cardsHtml = `
+            <div class="card header">
+                <div class="shop-title">JIGAR TUNNEL</div>
+                <p>اینترنت آزاد، پرسرعت و امن</p>
+                <div class="greeting" id="greeting"></div>
+            </div>
+        `;
+        for (let plan in products) {
+            cardsHtml += `
+                <div class="card" data-product="${plan}">
+                    <div class="product-row">
+                        <div class="product-info">
+                            <h3>${products[plan].icon} پلن ${products[plan].name}</h3>
+                            <div class="product-price">${products[plan].price.toLocaleString()} تومان</div>
+                        </div>
+                        <div>
+                            <button class="qty-btn" onclick="addToCart(${plan}, -1)">-</button>
+                            <span id="qty${plan}" style="min-width:30px; display:inline-block; text-align:center;">${cart[plan]}</span>
+                            <button class="qty-btn" onclick="addToCart(${plan}, 1)">+</button>
+                        </div>
+                    </div>
+                    <ul style="margin-top:12px; font-size:13px;">
+                        <li>✅ سرعت بالا بدون محدودیت</li>
+                        <li>✅ پشتیبانی ۲۴ ساعته</li>
+                        <li>✅ اتصال همزمان روی ۳ دستگاه</li>
+                    </ul>
+                </div>
+            `;
+        }
+        cardsHtml += `
+            <div class="card" style="text-align:center;">
+                <button class="checkout-btn" onclick="checkout()" style="background:#2563eb;">🛍️ نهایی کردن خرید</button>
+                <button class="checkout-btn support-btn" onclick="support()" style="background:#10b981; margin-top:8px;">📞 پشتیبانی</button>
+            </div>
+            <div class="card testimonials" style="text-align:center;">
+                <div class="stars">★★★★★</div>
+                <p>"عالی و پرسرعت، پشتیبانی پاسخگو"</p>
+                <p>— محمد رضا</p>
+            </div>
+            <footer style="text-align:center; margin:20px 0;">© Jigar Tunnel</footer>
+        `;
+        container.innerHTML = cardsHtml;
+        gsap.fromTo(".card", { opacity: 0, y: 30 }, { opacity: 1, y: 0, stagger: 0.08, duration: 0.5, ease: "back.out(0.5)" });
+    }
+
+    const user = tg.initDataUnsafe?.user;
+    document.addEventListener("DOMContentLoaded", () => {
+        const greeting = document.getElementById('greeting');
+        if (greeting) {
+            if (user && user.first_name) greeting.innerText = `👋 سلام ${user.first_name}!`;
+            else greeting.innerText = `✨ خوش آمدی`;
+        }
+    });
+
+    document.getElementById('mainContent').innerHTML = `
+        <div class="skeleton" style="height:150px; margin-bottom:20px;"></div>
+        <div class="skeleton" style="height:150px; margin-bottom:20px;"></div>
+        <div class="skeleton" style="height:150px; margin-bottom:20px;"></div>
+        <div class="skeleton" style="height:150px; margin-bottom:20px;"></div>
+        <div class="skeleton" style="height:150px; margin-bottom:20px;"></div>
+    `;
+    setTimeout(() => {
+        renderProducts();
+    }, 300);
+</script>
+</body>
+</html>
