@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Jigar Tunnel | فروشگاه</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}body{background:var(--tg-theme-bg-color,#f8fafc);color:var(--tg-theme-text-color,#0f172a);direction:rtl;padding:16px;transition:background .3s}body.dark{background:#0f172a;color:#e2e8f0}.card{background:rgba(255,255,255,.85);backdrop-filter:blur(12px);border-radius:32px;padding:20px;margin-bottom:20px;box-shadow:0 10px 25px -5px rgba(0,0,0,.1);border:1px solid rgba(255,255,255,.5)}.header{background:linear-gradient(135deg,#1e293b,#0f172a);color:#fff;text-align:center;border:none;cursor:pointer}.shop-title{display:inline-block;background:linear-gradient(90deg,#ffd89b,#c7e9fb);background-size:200% auto;color:#1e293b;padding:.2em .8em;border-radius:60px;font-size:2rem;font-weight:800;margin-bottom:10px;animation:shine 3s linear infinite;pointer-events:none}@keyframes shine{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}.filter-buttons{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}.filter-btn{background:#e2e8f0;border:none;padding:6px 15px;border-radius:40px;cursor:pointer}.product-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap}.product-price{font-weight:700;color:#2563eb}.stock{font-size:13px;margin-top:5px}.multi-location{font-size:13px;color:#10b981;margin:8px 0;background:rgba(16,185,129,.1);padding:6px 12px;border-radius:40px;display:inline-block}.qty-btn{background:#e2e8f0;border:none;width:36px;height:36px;border-radius:40px;font-size:20px;cursor:pointer}.cart-icon{position:fixed;bottom:20px;left:20px;background:#2563eb;color:#fff;width:56px;height:56px;border-radius:30px;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;z-index:1000}.cart-badge{position:absolute;top:-5px;right:-5px;background:#ef4444;border-radius:20px;padding:2px 8px;font-size:12px}.cart-panel{position:fixed;bottom:0;left:0;right:0;background:var(--tg-theme-bg-color,#fff);border-radius:32px 32px 0 0;padding:20px;transform:translateY(100%);transition:transform .3s;z-index:1001;max-height:80vh;overflow-y:auto}.cart-panel.open{transform:translateY(0)}.close-cart{float:left;background:0 0;border:none;font-size:24px;cursor:pointer}.cart-item{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(0,0,0,.05)}.cart-item-actions button{background:0 0;border:none;font-size:18px;cursor:pointer;margin:0 3px}.delete-btn{color:#ef4444}.discount-input{display:flex;gap:8px;margin:15px 0}.discount-input input{flex:2;padding:10px;border-radius:40px;border:1px solid #ccc}.apply-discount{background:#10b981;color:#fff;border:none;padding:10px 15px;border-radius:40px;cursor:pointer}.checkout-btn{background:#10b981;color:#fff;border:none;padding:14px;border-radius:40px;font-weight:700;width:100%;margin-top:16px;cursor:pointer}.support-btn{background:#2563eb}.review{margin:16px 0;padding:16px;background:rgba(0,0,0,.03);border-radius:28px;border-right:4px solid #fbbf24}.stars{color:#fbbf24;font-size:18px;cursor:pointer}.modal,.exit-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;z-index:2000;visibility:hidden;opacity:0;transition:.2s}.modal.open,.exit-modal.open{visibility:visible;opacity:1}.modal-content{background:var(--tg-theme-bg-color,#fff);border-radius:48px;padding:24px;width:90%;max-width:400px;max-height:80vh;overflow-y:auto}.admin-input,.review-input{width:100%;padding:8px;margin:8px 0;border-radius:40px;border:1px solid #ccc}.admin-btn{background:#2563eb;color:#fff;border:none;padding:10px;border-radius:40px;width:100%;margin-top:10px;cursor:pointer}.toast{position:fixed;bottom:90px;left:20px;background:#333;color:#fff;padding:8px 16px;border-radius:40px;font-size:14px;z-index:1100;opacity:0;transition:.2s;pointer-events:none}.theme-toggle{position:fixed;top:20px;right:20px;background:rgba(0,0,0,.5);border-radius:30px;padding:8px 12px;cursor:pointer;z-index:1002;font-size:20px}
+    </style>
+</head>
+<body>
+<div class="theme-toggle" onclick="toggleTheme()">🌓</div>
+<div id="toast" class="toast"></div>
+<div id="cartPanel" class="cart-panel">
+    <button class="close-cart" onclick="toggleCart()">✖</button>
+    <h3>🛒 سبد خرید</h3>
+    <div id="cartItems"></div>
+    <div id="cartTotal"></div>
+    <div class="discount-input">
+        <input type="text" id="discountCode" placeholder="کد تخفیف">
+        <button class="apply-discount" onclick="applyDiscount()">اعمال</button>
+    </div>
+    <button class="checkout-btn" onclick="checkout()">💰 تسویه نهایی</button>
+</div>
+<div class="cart-icon" onclick="toggleCart()">🛒<span id="cartCount" class="cart-badge">0</span></div>
+<div id="mainContent"></div>
+
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.ready(); tg.expand();
+    const ADMIN_PASSWORD = "AR_13900";
+    let isLocked = localStorage.getItem('shop_locked') === 'true';
+    let lockReason = localStorage.getItem('shop_lock_reason') || '';
+    const baseProducts = {
+        10: { name: "10 گیگ", price: 120000, icon: "📦", locations: ["آلمان","هلند","ترکیه"] },
+        20: { name: "20 گیگ", price: 240000, icon: "📦", locations: ["آلمان","هلند","ترکیه","فرانسه"] },
+        30: { name: "30 گیگ", price: 360000, icon: "📦", locations: ["آلمان","هلند","ترکیه","فرانسه","انگلستان"] },
+        40: { name: "40 گیگ", price: 480000, icon: "📦", locations: ["آلمان","هلند","ترکیه","فرانسه","انگلستان","کانادا"] },
+        50: { name: "50 گیگ", price: 600000, icon: "⚡", locations: ["آلمان","هلند","ترکیه","فرانسه","انگلستان","کانادا","آمریکا"] }
+    };
+    let stocks = JSON.parse(localStorage.getItem('product_stocks')) || {10:10,20:8,30:5,40:3,50:2};
+    let discountCodes = JSON.parse(localStorage.getItem('discount_codes')) || [];
+    let userReviews = JSON.parse(localStorage.getItem('user_reviews')) || [];
+    let cart = JSON.parse(localStorage.getItem('cart')) || {10:0,20:0,30:0,40:0,50:0};
+    let appliedDiscount = JSON.parse(localStorage.getItem('applied_discount')) || null;
+    let currentFilter = 'all';
+    if (localStorage.getItem('manual_theme') === 'dark') document.body.classList.add('dark');
+    function showToast(msg){let t=document.getElementById('toast');t.innerText=msg;t.style.opacity='1';setTimeout(()=>t.style.opacity='0',2000);}
+    function saveAll(){
+        localStorage.setItem('product_stocks',JSON.stringify(stocks));
+        localStorage.setItem('discount_codes',JSON.stringify(discountCodes));
+        localStorage.setItem('user_reviews',JSON.stringify(userReviews));
+        localStorage.setItem('cart',JSON.stringify(cart));
+        localStorage.setItem('applied_discount',JSON.stringify(appliedDiscount));
+        updateCartUI();
+        renderShopPage();
+    }
+    function updateCartUI(){let t=Object.values(cart).reduce((a,b)=>a+b,0);document.getElementById('cartCount').innerText=t;renderCartPanel();}
+    function calculateTotal(){let t=0;for(let p in cart)t+=cart[p]*baseProducts[p].price;if(appliedDiscount){let d=discountCodes.find(d=>d.code===appliedDiscount.code);if(d&&d.usesLeft>0&&d.expiry>Date.now())t=t*(100-d.percent)/100;else{appliedDiscount=null;localStorage.removeItem('applied_discount');}}return t;}
+    function renderCartPanel(){
+        let c=document.getElementById('cartItems');let total=calculateTotal();let html='';
+        if(total===0)html='<p>سبد خرید خالی است</p>';
+        else for(let p in cart)if(cart[p]>0)html+=`<div class="cart-item"><div>${baseProducts[p].icon} ${baseProducts[p].name} - ${cart[p]} × ${baseProducts[p].price.toLocaleString()} تومان</div><div><button onclick="addToCart(${p},-1)">-</button><button onclick="addToCart(${p},1)">+</button><button class="delete-btn" onclick="removeProduct(${p})">🗑️</button></div></div>`;
+        c.innerHTML=html;let ts=document.getElementById('cartTotal');if(appliedDiscount){let d=discountCodes.find(d=>d.code===appliedDiscount.code);if(d)ts.innerHTML=`مجموع: ${total.toLocaleString()} تومان <span style="color:#10b981;">(تخفیف ${d.percent}%)</span>`;else ts.innerHTML=`مجموع: ${total.toLocaleString()} تومان`;}
+        else ts.innerHTML=`مجموع: ${total.toLocaleString()} تومان`;
+    }
+    function addToCart(p,delta){let n=cart[p]+delta;if(n<0)n=0;if(n>stocks[p]){showToast(`تنها ${stocks[p]} عدد موجود!`);return;}cart[p]=n;saveAll();showToast(delta>0?'➕ افزوده شد':'➖ حذف شد');let s=document.getElementById(`qty${p}`);if(s)s.innerText=cart[p];}
+    function removeProduct(p){cart[p]=0;saveAll();showToast('🗑️ حذف شد');let s=document.getElementById(`qty${p}`);if(s)s.innerText=0;}
+    function applyDiscount(){let code=document.getElementById('discountCode').value.trim();if(!code){showToast('کد را وارد کنید');return;}let d=discountCodes.find(d=>d.code===code);if(!d){showToast('کد نامعتبر');return;}if(d.expiry<Date.now()){showToast('کد منقضی شده');return;}if(d.usesLeft<=0){showToast('کد استفاده شده');return;}appliedDiscount={code:code,percent:d.percent};localStorage.setItem('applied_discount',JSON.stringify(appliedDiscount));showToast(`کد ${code} اعمال شد! ${d.percent}% تخفیف`);renderCartPanel();document.getElementById('discountCode').value='';}
+    function checkout(){
+        let totalItems = Object.values(cart).reduce((a,b)=>a+b,0);
+        if(totalItems===0){showToast('سبد خالی');return;}
+        // ارسال دیتا به ربات
+        let cartData = {};
+        for(let plan in cart){
+            if(cart[plan] > 0) cartData[plan] = cart[plan];
+        }
+        let data = JSON.stringify({ action: 'checkout', cart: cartData });
+        tg.sendData(data);
+        // نمایش پیام موفقیت
+        tg.showPopup({
+            title: "✅ سبد خرید ارسال شد",
+            message: "سبد خرید شما با موفقیت به ربات ارسال شد. لطفاً ربات را باز کنید و مراحل بعدی را ادامه دهید.",
+            buttons: [{ type: "ok" }]
+        });
+        tg.close(); // بستن مینی اپ
+    }
+    function toggleCart(){document.getElementById('cartPanel').classList.toggle('open');}
+    function setFilter(type){currentFilter=type;renderShopPage();}
+    function renderShopPage(){
+        let container=document.getElementById('mainContent');
+        let filtered={...baseProducts};
+        if(currentFilter==='under300')filtered=Object.fromEntries(Object.entries(baseProducts).filter(([k,p])=>p.price<300000));
+        else if(currentFilter==='under500')filtered=Object.fromEntries(Object.entries(baseProducts).filter(([k,p])=>p.price<500000));
+        let html=`<div class="card header" onclick="openAdminPanel()"><div class="shop-title">JIGAR TUNNEL</div><p>اینترنت آزاد، پرسرعت و امن</p><div id="greeting"></div></div>
+        <div class="filter-buttons"><button class="filter-btn ${currentFilter==='all'?'active':''}" onclick="setFilter('all')">همه</button><button class="filter-btn ${currentFilter==='under300'?'active':''}" onclick="setFilter('under300')">زیر ۳۰۰ هزار</button><button class="filter-btn ${currentFilter==='under500'?'active':''}" onclick="setFilter('under500')">زیر ۵۰۰ هزار</button></div>`;
+        for(let plan in filtered){
+            let p=filtered[plan];
+            let locList=p.locations.slice(0,2).map(l=>`📍 ${l}`).join(' • ')+(p.locations.length>2?' ...':'');
+            let stockText=stocks[plan]<=3?`<div class="stock">⚠️ فقط ${stocks[plan]} عدد باقی‌مانده!</div>`:`<div class="stock">موجود: ${stocks[plan]} عدد</div>`;
+            html+=`<div class="card"><div class="product-row"><div><h3>${p.icon} پلن ${p.name}</h3><div class="product-price">${p.price.toLocaleString()} تومان</div><div class="multi-location">🌍 ${locList}</div>${stockText}</div><div><button class="qty-btn" onclick="addToCart(${plan},-1)">-</button><span id="qty${plan}" style="min-width:30px;display:inline-block;text-align:center;">${cart[plan]}</span><button class="qty-btn" onclick="addToCart(${plan},1)">+</button></div></div></div>`;
+        }
+        let allReviews=[...userReviews,{name:"مهدی کریمی",text:"عالی بود! سرعت خیلی خوب",stars:5},{name:"سارا حسینی",text:"پشتیبانی عالی",stars:5}];
+        html+=`<div class="card"><h3>💬 نظرات کاربران <button class="filter-btn" onclick="openReviewModal()">➕ نظر جدید</button></h3>`;
+        for(let r of allReviews.slice(-6))html+=`<div class="review"><div class="stars">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div><div class="review-name">👤 ${r.name}</div><div class="review-text">“${r.text}”</div></div>`;
+        html+=`<div class="card" style="text-align:center;"><button class="checkout-btn" onclick="openReferral()">🎁 لینک دعوت (تخفیف ۵٪)</button>
+        <button class="checkout-btn support-btn" onclick="trackOrder()" style="background:#6c5ce7;">🔍 پیگیری سفارش</button>
+        </div></div>`;
+        container.innerHTML=html;
+        let u=tg.initDataUnsafe?.user;let g=document.getElementById('greeting');if(g)g.innerText=u?`👋 سلام ${u.first_name}! خوش آمدی`:`✨ خوش آمدی`;
+        gsap.fromTo(".card",{opacity:0,y:20},{opacity:1,y:0,stagger:0.05,duration:0.4});
+    }
+    function trackOrder(){
+        const BOT_USERNAME = "jigartuunelbot";
+        tg.openTelegramLink(`https://t.me/${BOT_USERNAME}?start=track`);
+        tg.close();
+    }
+    function openAdminPanel(){
+        let pwd=prompt("رمز مدیریت را وارد کنید:");
+        if(pwd!==ADMIN_PASSWORD){showToast("رمز اشتباه");return;}
+        let modalHtml=`<div class="modal-content"><h3>🔧 پنل مدیریت</h3>`;
+        for(let plan of [10,20,30,40,50]){
+            modalHtml+=`<div style="margin-bottom:15px;"><label>${baseProducts[plan].name}</label>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <button class="qty-btn" onclick="changeStock(${plan}, -1)">-</button>
+                <span id="stockVal_${plan}" style="min-width:40px; text-align:center;">${stocks[plan]}</span>
+                <button class="qty-btn" onclick="changeStock(${plan}, 1)">+</button>
+                <input type="number" id="stockInput_${plan}" value="${stocks[plan]}" style="width:80px; padding:6px; border-radius:20px; border:1px solid #ccc;">
+                <button class="admin-btn" style="width:auto; padding:6px 12px;" onclick="setStockDirect(${plan})">ثبت</button>
+            </div></div>`;
+        }
+        modalHtml+=`<button class="admin-btn" id="toggleShopBtn">${isLocked?'فعال کردن فروشگاه':'غیرفعال کردن فروشگاه'}</button>
+                    <h4>مدیریت کدهای تخفیف</h4>
+                    <input type="text" id="newCode" placeholder="کد جدید" class="admin-input">
+                    <input type="number" id="newPercent" placeholder="درصد تخفیف" class="admin-input">
+                    <input type="number" id="newUses" placeholder="تعداد مصرف" class="admin-input">
+                    <input type="number" id="newDays" placeholder="اعتبار (روز)" class="admin-input">
+                    <button class="admin-btn" onclick="addDiscountCode()">➕ افزودن</button>
+                    <div id="discountList"></div>
+                    <button class="admin-btn" onclick="closeAdminModal()">بستن</button>
+                </div>`;
+        document.getElementById('adminModal').innerHTML = modalHtml;
+        renderDiscountList();
+        document.getElementById('adminModal').classList.add('open');
+        document.getElementById('toggleShopBtn').onclick = () => toggleShopLock();
+    }
+    window.changeStock = function(plan, delta){
+        let newVal = stocks[plan] + delta;
+        if(newVal < 0) newVal = 0;
+        stocks[plan] = newVal;
+        document.getElementById(`stockVal_${plan}`).innerText = newVal;
+        document.getElementById(`stockInput_${plan}`).value = newVal;
+        saveAll();
+        showToast(`موجودی ${baseProducts[plan].name} تغییر کرد به ${newVal}`);
+    };
+    window.setStockDirect = function(plan){
+        let inputVal = parseInt(document.getElementById(`stockInput_${plan}`).value);
+        if(!isNaN(inputVal) && inputVal >= 0){
+            stocks[plan] = inputVal;
+            document.getElementById(`stockVal_${plan}`).innerText = inputVal;
+            saveAll();
+            showToast(`موجودی ${baseProducts[plan].name} تنظیم شد به ${inputVal}`);
+        } else showToast('عدد نامعتبر');
+    };
+    function closeAdminModal(){
+        document.getElementById('adminModal').classList.remove('open');
+        saveAll();
+    }
+    function toggleShopLock(){
+        if(!isLocked){
+            let reason = prompt("علت خاموشی فروشگاه را وارد کنید:","در حال بروزرسانی");
+            if(reason){
+                isLocked = true;
+                localStorage.setItem('shop_locked','true');
+                localStorage.setItem('shop_lock_reason',reason);
+                location.reload();
+            }
+        } else {
+            localStorage.setItem('shop_locked','false');
+            localStorage.removeItem('shop_lock_reason');
+            location.reload();
+        }
+    }
+    function renderDiscountList(){
+        let div = document.getElementById('discountList');
+        if(!div) return;
+        let html = '<h4>کدهای تخفیف موجود</h4>';
+        for(let d of discountCodes){
+            html += `<div style="margin:5px 0;display:flex;justify-content:space-between;"><span>${d.code} (${d.percent}%) - باقی‌مانده: ${d.usesLeft} - انقضا: ${new Date(d.expiry).toLocaleDateString()}</span><button onclick="deleteDiscount('${d.code}')">❌</button></div>`;
+        }
+        div.innerHTML = html;
+    }
+    function addDiscountCode(){
+        let code = document.getElementById('newCode').value.trim().toUpperCase();
+        let percent = parseInt(document.getElementById('newPercent').value);
+        let usesLeft = parseInt(document.getElementById('newUses').value);
+        let days = parseInt(document.getElementById('newDays').value);
+        if(!code || isNaN(percent) || isNaN(usesLeft) || isNaN(days)){ showToast("تمام فیلدها را پر کنید"); return; }
+        let expiry = Date.now() + days * 86400000;
+        discountCodes.push({code,percent,usesLeft,expiry});
+        localStorage.setItem('discount_codes',JSON.stringify(discountCodes));
+        renderDiscountList();
+        document.getElementById('newCode').value = '';
+        showToast(`کد ${code} اضافه شد`);
+    }
+    function deleteDiscount(code){
+        discountCodes = discountCodes.filter(d => d.code !== code);
+        localStorage.setItem('discount_codes',JSON.stringify(discountCodes));
+        renderDiscountList();
+        if(appliedDiscount && appliedDiscount.code === code){
+            appliedDiscount = null;
+            localStorage.removeItem('applied_discount');
+        }
+        showToast('کد حذف شد');
+    }
+    let ratingValue = 5;
+    function openReviewModal(){
+        document.getElementById('reviewModal').classList.add('open');
+        ratingValue = 5;
+        document.getElementById('ratingStars').innerHTML = '★★★★★';
+    }
+    function closeReviewModal(){ document.getElementById('reviewModal').classList.remove('open'); }
+    function submitReview(){
+        let name = document.getElementById('reviewName').value.trim();
+        let text = document.getElementById('reviewText').value.trim();
+        if(!name || !text){ showToast('نام و نظر را وارد کنید'); return; }
+        userReviews.push({name,text,stars:ratingValue});
+        localStorage.setItem('user_reviews',JSON.stringify(userReviews));
+        closeReviewModal();
+        renderShopPage();
+        showToast('نظر شما ثبت شد');
+    }
+    document.getElementById('ratingStars')?.addEventListener('click',(e)=>{
+        let rect = e.target.getBoundingClientRect();
+        let x = e.clientX - rect.left;
+        let w = rect.width / 5;
+        let nr = Math.floor(x / w) + 1;
+        ratingValue = Math.min(5, Math.max(1, nr));
+        document.getElementById('ratingStars').innerHTML = '★'.repeat(ratingValue) + '☆'.repeat(5-ratingValue);
+    });
+    function openReferral(){
+        tg.showPopup({title:"لینک دعوت شما",message:`کد دعوت: ${Math.random().toString(36).substr(2,6).toUpperCase()}\nبا اشتراک، دوستان ۵٪ تخفیف می‌گیرند.`,buttons:[{type:"ok"}]});
+    }
+    function toggleTheme(){
+        document.body.classList.toggle('dark');
+        localStorage.setItem('manual_theme',document.body.classList.contains('dark')?'dark':'light');
+    }
+    let exitShown = false;
+    document.addEventListener('mouseleave',(e)=>{
+        if(e.clientY < 0 && !exitShown && !isLocked){
+            exitShown = true;
+            document.getElementById('exitModal').classList.add('open');
+        }
+    });
+    function closeExitModal(){
+        document.getElementById('exitModal').classList.remove('open');
+        if(!discountCodes.find(d=>d.code==='EXIT10')){
+            discountCodes.push({code:'EXIT10',percent:10,usesLeft:999,expiry:Date.now()+7*86400000});
+            localStorage.setItem('discount_codes',JSON.stringify(discountCodes));
+        }
+    }
+    if(isLocked){
+        document.body.innerHTML = `<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.95);color:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:9999;"><h2>🔧 فروشگاه در حال بروزرسانی</h2><p>${lockReason}</p><button onclick="unlockShop()" style="margin-top:30px;background:#2563eb;border:none;padding:12px 24px;border-radius:40px;color:white;font-size:16px;cursor:pointer;">🔓 فعال‌سازی (مدیر)</button></div>`;
+        window.unlockShop = function(){
+            let pwd = prompt("رمز مدیریت را وارد کنید:");
+            if(pwd === ADMIN_PASSWORD){
+                localStorage.setItem('shop_locked','false');
+                localStorage.removeItem('shop_lock_reason');
+                location.reload();
+            } else alert("رمز اشتباه!");
+        };
+        throw new Error("Locked");
+    }
+    function init(){ renderShopPage(); updateCartUI(); }
+    document.getElementById('mainContent').innerHTML = '<div style="text-align:center;">در حال بارگذاری...</div>';
+    setTimeout(init, 100);
+</script>
+<div id="adminModal" class="modal"></div>
+<div id="reviewModal" class="modal"><div class="modal-content"><h3>📝 ثبت نظر</h3><input type="text" id="reviewName" placeholder="نام شما" class="review-input"><textarea id="reviewText" placeholder="نظر شما..." rows="3" class="review-input"></textarea><div class="stars" id="ratingStars">★★★★★</div><button class="admin-btn" onclick="submitReview()">ارسال نظر</button><button class="admin-btn" onclick="closeReviewModal()">بستن</button></div></div>
+<div id="exitModal" class="exit-modal"><div class="modal-content"><h3>🎁 تخفیف ویژه خروج</h3><p>از خرید منصرف شدی؟ از کد <strong>EXIT10</strong> برای ۱۰٪ تخفیف استفاده کن.</p><button class="admin-btn" onclick="closeExitModal()">بستن</button></div></div>
+</body>
+</html>
