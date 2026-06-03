@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Jigar Tunnel | فروشگاه حرفه‌ای</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+        }
+
+        /* ========== پس زمینه گرادینت متحرک و شاداب ========== */
+        body {
+            min-height: 100vh;
+            background: linear-gradient(125deg, #ff6a00, #ee0979, #3b82f6, #00f2fe);
+            background-size: 400% 400%;
+            animation: gradientFlow 12s ease infinite;
+            color: #fff;
+            direction: rtl;
+            padding: 16px;
+            position: relative;
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* ذرات متحرک (کانواس) */
+        #particlesCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* کارت‌های شیشه‌ای با حاشیه درخشان */
+        .card {
+            position: relative;
+            z-index: 2;
+            background: rgba(20, 30, 55, 0.55);
+            backdrop-filter: blur(8px);
+            border-radius: 36px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            transition: all 0.4s ease;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ffd89b, #c7e9fb, #fbc2eb, #a6c1ee);
+            border-radius: 38px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 40px rgba(0,0,0,0.3);
+        }
+
+        .header {
+            text-align: center;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(12px);
+            cursor: pointer;
+        }
+
+        .shop-title {
+            display: inline-block;
+            background: linear-gradient(135deg, #fff, #ffd89b);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+
+        .announcement-bar {
+            background: rgba(0,0,0,0.5);
+            border-radius: 60px;
+            padding: 10px 16px;
+            margin-top: 12px;
+            font-size: 14px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,215,0,0.5);
+        }
+
+        .product-price {
+            font-size: 26px;
+            font-weight: 800;
+            background: linear-gradient(90deg, #f0f, #ff0);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .multi-location {
+            background: rgba(0,0,0,0.4);
+            border-radius: 40px;
+            padding: 6px 12px;
+            display: inline-block;
+            font-size: 13px;
+        }
+
+        .buy-btn {
+            background: linear-gradient(95deg, #ff6a00, #ee0979);
+            border: none;
+            padding: 12px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+            color: white;
+            width: 100%;
+            margin-top: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .buy-btn:active {
+            transform: scale(0.96);
+        }
+
+        .support-btn {
+            background: linear-gradient(95deg, #11998e, #38ef7d);
+        }
+
+        .rules-btn {
+            background: linear-gradient(95deg, #8E2DE2, #4A00E0);
+        }
+
+        .review {
+            background: rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 14px;
+            margin: 12px 0;
+            border-right: 4px solid gold;
+        }
+
+        /* مودال‌ها (همانند قبل با رنگ‌های شادتر) */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+        .modal.open {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-content {
+            background: #1e293b;
+            border-radius: 48px;
+            padding: 24px;
+            width: 90%;
+            max-width: 450px;
+            color: white;
+        }
+        .admin-input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 40px;
+            background: #0f172a;
+            border: 1px solid #475569;
+            color: white;
+        }
+        .admin-btn {
+            background: #3b82f6;
+            border: none;
+            padding: 10px;
+            border-radius: 40px;
+            width: 100%;
+            margin-top: 8px;
+            color: white;
+            cursor: pointer;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: #000000aa;
+            backdrop-filter: blur(8px);
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 14px;
+            z-index: 1100;
+            opacity: 0;
+            transition: 0.2s;
+        }
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 30px;
+            padding: 8px 12px;
+            cursor: pointer;
+            z-index: 10;
+            font-size: 20px;
+        }
+        footer {
+            text-align: center;
+            font-size: 12px;
+            margin-top: 20px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+<div class="theme-toggle" onclick="toggleTheme()">🌓</div>
+<div id="toast" class="toast"></div>
+<canvas id="particlesCanvas"></canvas>
+<div id="mainContent"></div>
+
+<!-- مودال قوانین -->
+<div id="rulesModal" class="modal">
+    <div class="modal-content">
+        <h3>📜 قوانین</h3>
+        <div style="text-align: justify;">
+            <p>1️⃣ رسید جعلی ممنوع → مسدودیت</p>
+            <p>2️⃣ واریز دقیق مبلغ</p>
+            <p>3️⃣ عدم انصراف پس از ارسال</p>
+            <p>4️⃣ پشتیبانی فقط در ربات</p>
+            <p>⚠️ تخلف = مسدودیت</p>
+        </div>
+        <button class="admin-btn" onclick="closeRulesModal()">بستن</button>
+    </div>
+</div>
+
+<!-- مودال خرید -->
+<div id="buyModal" class="modal">
+    <div class="modal-content">
+        <h3 id="modalPlanTitle"></h3>
+        <div style="margin: 15px 0;"><label>🔢 تعداد:</label>
+            <div style="display: flex; gap: 10px;">
+                <button id="modalQtyMinus" class="admin-btn" style="width: 40px;">-</button>
+                <span id="modalQty" style="font-size: 24px;">1</span>
+                <button id="modalQtyPlus" class="admin-btn" style="width: 40px;">+</button>
+            </div>
+        </div>
+        <div><label>🎫 کد تخفیف:</label><input id="modalDiscount" class="admin-input"></div>
+        <div id="discountFeedback" style="font-size:12px"></div>
+        <div style="margin:15px 0;"><label>💰 روش پرداخت:</label>
+            <div style="display:flex; gap:10px;"><button id="modalPayWallet" class="admin-btn" style="background:#10b981;">کیف پول</button><button id="modalPayCard" class="admin-btn">کارت به کارت</button></div>
+        </div>
+        <div>💰 مبلغ: <span id="modalTotalPrice">0</span> تومان</div>
+        <button id="modalConfirm" class="admin-btn" style="background:#8b5cf6;">نهایی کردن</button>
+        <button id="modalCancel" class="admin-btn" style="background:#ef4444;">انصراف</button>
+    </div>
+</div>
+
+<script>
+    // ========== تنظیمات ==========
+    const ADMIN_PASSWORD = "AR_13900";
+    const BOT_USERNAME = "jigartuunelbot";
+    const ADMIN_TELEGRAM_ID = "7955284547";
+    const USE_BAN_CHECK = false;
+    
+    let isLocked = localStorage.getItem('shop_locked') === 'true';
+    let lockReason = localStorage.getItem('shop_lock_reason') || '';
+    let announcementText = localStorage.getItem('announcement_text') || "🎁 کد تخفیف: newjigar (۱۰٪)";
+    
+    const products = {
+        10: { name: "10 گیگ", price: 90000, icon: "📦", locations: ["آلمان","هلند"], days: 100 },
+        20: { name: "20 گیگ", price: 180000, icon: "📦", locations: ["آلمان","هلند","فرانسه"], days: 100 },
+        30: { name: "30 گیگ", price: 270000, icon: "📦", locations: ["آلمان","هلند","فرانسه","انگلستان"], days: 100 },
+        50: { name: "50 گیگ", price: 450000, icon: "⚡", locations: ["آلمان","هلند","فرانسه","انگلستان","کانادا"], days: 100 }
+    };
+    let stocks = JSON.parse(localStorage.getItem('product_stocks')) || {10:10,20:8,30:5,50:2};
+    let discountCodes = JSON.parse(localStorage.getItem('discount_codes')) || [{ code: "newjigar", percent: 10, usesLeft: 5, expiry: Date.now() + 30*86400000 }];
+    const reviews = [
+        { name: "مهدی", text: "سرعت عالی، پشتیبانی فوق‌العاده", stars: 5 },
+        { name: "سارا", text: "مولتی لوکیشن عالی", stars: 5 },
+        { name: "علی", text: "بهترین سرویس", stars: 5 }
+    ];
+    
+    let currentPlan = null, currentQty = 1, currentMethod = null;
+    
+    function showToast(msg) {
+        let t = document.getElementById('toast');
+        t.innerText = msg;
+        t.style.opacity = '1';
+        setTimeout(() => t.style.opacity = '0', 2000);
+    }
+    function saveStocks() { localStorage.setItem('product_stocks', JSON.stringify(stocks)); }
+    function saveDiscountCodes() { localStorage.setItem('discount_codes', JSON.stringify(discountCodes)); }
+    
+    function validateDiscount(code, total) {
+        let d = discountCodes.find(d => d.code === code);
+        if (!d) return { valid: false, msg: "کد نامعتبر", final: total };
+        if (d.expiry < Date.now()) return { valid: false, msg: "منقضی", final: total };
+        if (d.usesLeft <= 0) return { valid: false, msg: "استفاده شده", final: total };
+        let final = total * (100 - d.percent) / 100;
+        return { valid: true, final: Math.floor(final), msg: `${d.percent}% تخفیف`, discountObj: d };
+    }
+    
+    function openBuyModal(plan) {
+        if (isLocked) { showToast("فروشگاه در حال بروزرسانی"); return; }
+        currentPlan = plan;
+        currentQty = 1;
+        currentMethod = null;
+        document.getElementById('modalPlanTitle').innerHTML = `${products[plan].icon} ${products[plan].name}`;
+        document.getElementById('modalQty').innerText = currentQty;
+        document.getElementById('modalDiscount').value = "";
+        updateModalTotal();
+        document.getElementById('buyModal').classList.add('open');
+    }
+    function updateModalTotal() {
+        if (!currentPlan) return;
+        let base = products[currentPlan].price * currentQty;
+        let code = document.getElementById('modalDiscount').value.trim();
+        let v = validateDiscount(code, base);
+        if (code && !v.valid) document.getElementById('discountFeedback').innerHTML = `<span style="color:#f87171;">${v.msg}</span>`;
+        else if (code && v.valid) document.getElementById('discountFeedback').innerHTML = `<span style="color:#34d399;">${v.msg}</span>`;
+        else document.getElementById('discountFeedback').innerHTML = "";
+        document.getElementById('modalTotalPrice').innerText = (v.valid ? v.final : base).toLocaleString();
+    }
+    function finalizePurchase(method) {
+        if (!currentPlan) return;
+        let code = document.getElementById('modalDiscount').value.trim();
+        let base = products[currentPlan].price * currentQty;
+        let v = validateDiscount(code, base);
+        if (code && !v.valid) { showToast(v.msg); return; }
+        if (v.valid && v.discountObj) {
+            let idx = discountCodes.findIndex(d => d.code === code);
+            if (idx !== -1) discountCodes[idx].usesLeft--;
+            saveDiscountCodes();
+        }
+        let url = `https://t.me/${BOT_USERNAME}?start=buy_${currentPlan}_${currentQty}`;
+        if (code && v.valid) url += `_${code}`;
+        tg.openTelegramLink(url);
+        tg.close();
+        closeBuyModal();
+    }
+    function closeBuyModal() { document.getElementById('buyModal').classList.remove('open'); }
+    function showRulesModal() { document.getElementById('rulesModal').classList.add('open'); }
+    function closeRulesModal() { document.getElementById('rulesModal').classList.remove('open'); }
+    function support() { tg.openTelegramLink(`tg://user?id=${ADMIN_TELEGRAM_ID}`); tg.close(); }
+    function trackOrder() { tg.openTelegramLink(`https://t.me/${BOT_USERNAME}?start=track`); tg.close(); }
+    function toggleTheme() { document.body.classList.toggle('dark'); }
+    
+    // پنل مدیریت (ساده)
+    function openAdminPanel() {
+        let pwd = prompt("رمز مدیریت:");
+        if (pwd !== ADMIN_PASSWORD) { showToast("رمز اشتباه"); return; }
+        renderAdminModal();
+        document.getElementById('adminModal').classList.add('open');
+    }
+    function renderAdminModal() {
+        let stockHtml = "";
+        for (let p of [10,20,30,50]) {
+            stockHtml += `<div><label>${products[p].name}</label><div style="display:flex; gap:5px;"><button onclick="changeStock(${p},-1)">-</button><span id="stockVal_${p}">${stocks[p]}</span><button onclick="changeStock(${p},1)">+</button><input type="number" id="stockInput_${p}" value="${stocks[p]}" style="width:70px;"><button onclick="setStockDirect(${p})">ثبت</button></div></div>`;
+        }
+        let discHtml = discountCodes.map(d => `<div>${d.code} (${d.percent}%) - باقی:${d.usesLeft}<button onclick="deleteDiscount('${d.code}')">حذف</button></div>`).join('');
+        let modalHtml = `<div class="modal-content"><h3>پنل مدیریت</h3><textarea id="announceInput" rows="2">${announcementText}</textarea><button onclick="saveAnnounce()">ذخیره اعلان</button><hr>${stockHtml}<hr><div><input id="newCode" placeholder="کد"><input id="newPercent" placeholder="درصد"><input id="newUses" placeholder="تعداد"><input id="newDays" placeholder="روز"><button onclick="addDiscount()">افزودن کد</button></div>${discHtml}<hr><button onclick="toggleShopLock()">${isLocked ? 'فعال‌سازی' : 'غیرفعال‌سازی'}</button><button onclick="closeAdminModal()">بستن</button></div>`;
+        let modalDiv = document.getElementById('adminModal');
+        modalDiv.innerHTML = modalHtml;
+    }
+    window.changeStock = function(plan, delta) { stocks[plan] = Math.max(0, stocks[plan] + delta); saveStocks(); document.getElementById(`stockVal_${plan}`).innerText = stocks[plan]; document.getElementById(`stockInput_${plan}`).value = stocks[plan]; showToast(`موجودی ${products[plan].name}: ${stocks[plan]}`); };
+    window.setStockDirect = function(plan) { let v = parseInt(document.getElementById(`stockInput_${plan}`).value); if(!isNaN(v) && v>=0) { stocks[plan]=v; saveStocks(); document.getElementById(`stockVal_${plan}`).innerText=v; showToast("ثبت شد"); } };
+    function saveAnnounce() { announcementText = document.getElementById('announceInput').value; localStorage.setItem('announcement_text', announcementText); renderShopPage(); showToast("اعلان ذخیره شد"); }
+    function addDiscount() { let code = document.getElementById('newCode').value.trim().toUpperCase(); let percent = parseInt(document.getElementById('newPercent').value); let uses = parseInt(document.getElementById('newUses').value); let days = parseInt(document.getElementById('newDays').value); if(!code || isNaN(percent) || isNaN(uses) || isNaN(days)) { showToast("مقادیر نامعتبر"); return; } discountCodes.push({code, percent, usesLeft: uses, expiry: Date.now()+days*86400000}); saveDiscountCodes(); renderAdminModal(); showToast("کد اضافه شد"); }
+    function deleteDiscount(code) { discountCodes = discountCodes.filter(d => d.code !== code); saveDiscountCodes(); renderAdminModal(); showToast("حذف شد"); }
+    function closeAdminModal() { document.getElementById('adminModal').classList.remove('open'); }
+    function toggleShopLock() { if(!isLocked) { let r = prompt("علت خاموشی:"); if(r) { isLocked=true; localStorage.setItem('shop_locked','true'); localStorage.setItem('shop_lock_reason',r); location.reload(); } } else { localStorage.setItem('shop_locked','false'); localStorage.removeItem('shop_lock_reason'); location.reload(); } }
+    
+    function renderShopPage() {
+        if(isLocked) { document.getElementById('mainContent').innerHTML = `<div style="text-align:center;padding:50px;"><h2>🔧 فروشگاه غیرفعال</h2><p>${lockReason}</p><button onclick="location.reload()">تلاش مجدد</button></div>`; return; }
+        let html = `<div class="card header" onclick="openAdminPanel()"><div class="shop-title">JIGAR TUNNEL</div><p>اینترنت آزاد، پرسرعت و امن</p><div id="greeting"></div><div class="announcement-bar">${announcementText}</div></div>`;
+        for(let p in products) {
+            let pr = products[p];
+            let loc = pr.locations.slice(0,2).join(' • ')+(pr.locations.length>2?' ...':'');
+            let stockTxt = stocks[p]<=3 ? `<div class="stock">⚠️ فقط ${stocks[p]} عدد باقی!</div>` : `<div>موجود: ${stocks[p]}</div>`;
+            html += `<div class="card"><h3>${pr.icon} پلن ${pr.name}</h3><div class="product-price">${pr.price.toLocaleString()} تومان</div><div class="multi-location">🌍 ${loc}</div><div>✅ مدت اعتبار: ${pr.days} روز</div>${stockTxt}<button class="buy-btn" onclick="openBuyModal(${p})">🛒 خرید ${pr.name}</button></div>`;
+        }
+        html += `<div class="card"><h3>💬 نظرات</h3>`;
+        reviews.forEach(r => html += `<div class="review"><div class="stars">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div><div>👤 ${r.name}</div><div>“${r.text}”</div></div>`);
+        html += `</div><div class="card" style="text-align:center;"><button class="buy-btn support-btn" onclick="support()">📞 پشتیبانی</button><button class="buy-btn" onclick="trackOrder()">🔍 پیگیری سفارش</button><button class="buy-btn rules-btn" onclick="showRulesModal()">📜 قوانین</button></div><footer>© Jigar Tunnel</footer>`;
+        document.getElementById('mainContent').innerHTML = html;
+        let user = tg.initDataUnsafe?.user;
+        if(document.getElementById('greeting')) document.getElementById('greeting').innerHTML = user ? `👋 سلام ${user.first_name}` : "✨ خوش آمدی";
+        gsap.fromTo(".card", {opacity:0, y:30}, {opacity:1, y:0, stagger:0.05, duration:0.6});
+    }
+    
+    // ذرات متحرک (جایگزین پس‌زمینه تار)
+    const canvas = document.getElementById('particlesCanvas');
+    const ctxP = canvas.getContext('2d');
+    let particles = [];
+    function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    function createParticles() { for(let i=0;i<80;i++) particles.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, radius:Math.random()*3+1, vx:(Math.random()-0.5)*0.5, vy:(Math.random()-0.5)*0.3, alpha:Math.random()*0.5+0.2}); }
+    function drawParticles() { if(!ctxP) return; ctxP.clearRect(0,0,canvas.width,canvas.height); particles.forEach(p=>{ ctxP.beginPath(); ctxP.arc(p.x,p.y,p.radius,0,Math.PI*2); ctxP.fillStyle = `rgba(255,255,200,${p.alpha})`; ctxP.fill(); p.x+=p.vx; p.y+=p.vy; if(p.x<0) p.x=canvas.width; if(p.x>canvas.width) p.x=0; if(p.y<0) p.y=canvas.height; if(p.y>canvas.height) p.y=0; }); requestAnimationFrame(drawParticles); }
+    window.addEventListener('resize', ()=>{ resizeCanvas(); particles=[]; createParticles(); });
+    resizeCanvas(); createParticles(); drawParticles();
+    
+    // اضافه کردن مودال مدیریت
+    let adminDiv = document.createElement('div');
+    adminDiv.id = 'adminModal';
+    adminDiv.className = 'modal';
+    document.body.appendChild(adminDiv);
+    
+    // اتصال دکمه‌های مودال خرید
+    document.getElementById('modalQtyMinus')?.addEventListener('click', () => { if(currentQty>1) { currentQty--; document.getElementById('modalQty').innerText=currentQty; updateModalTotal(); } });
+    document.getElementById('modalQtyPlus')?.addEventListener('click', () => { if(currentQty < stocks[currentPlan]) { currentQty++; document.getElementById('modalQty').innerText=currentQty; updateModalTotal(); } else showToast(`فقط ${stocks[currentPlan]} عدد موجود است!`); });
+    document.getElementById('modalDiscount')?.addEventListener('input', updateModalTotal);
+    document.getElementById('modalPayWallet')?.addEventListener('click', () => finalizePurchase('wallet'));
+    document.getElementById('modalPayCard')?.addEventListener('click', () => finalizePurchase('card'));
+    document.getElementById('modalConfirm')?.addEventListener('click', () => { if(!currentMethod) showToast("روش پرداخت را انتخاب کنید"); else finalizePurchase(currentMethod); });
+    document.getElementById('modalCancel')?.addEventListener('click', closeBuyModal);
+    
+    const tg = window.Telegram.WebApp;
+    tg.ready(); tg.expand();
+    renderShopPage();
+</script>
+</body>
+</html>
