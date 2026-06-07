@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>تریاشاپ | فروشگاه استارز و گیفت</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Poppins', system-ui; }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(-45deg, #e0e0e0, #f5f5f5, #ffffff, #e8e8e8);
+            background-size: 400% 400%;
+            animation: grayFlow 15s ease infinite;
+            padding: 20px;
+            direction: rtl;
+        }
+        @keyframes grayFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .container { max-width: 550px; margin: 0 auto; }
+        .card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 28px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: 0.2s;
+        }
+        .card:hover { transform: translateY(-2px); }
+        .header {
+            text-align: center;
+            background: #fff;
+            border-bottom: 3px solid #ff6a00;
+        }
+        .shop-title { font-size: 1.8rem; font-weight: 800; color: #ff6a00; }
+        .product {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .product:last-child { border-bottom: none; }
+        .product-info h3 { font-size: 1rem; margin-bottom: 5px; }
+        .product-price { color: #ff6a00; font-weight: bold; font-size: 1.1rem; }
+        .stock-badge { font-size: 12px; color: #64748b; margin-top: 4px; }
+        .buy-btn {
+            background: #ff6a00;
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.1s;
+        }
+        .buy-btn:active { transform: scale(0.96); }
+        .buy-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .admin-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1e293b;
+            color: white;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 100;
+            transition: 0.2s;
+        }
+        .admin-panel:active { transform: scale(0.94); }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+        .modal.open { visibility: visible; opacity: 1; }
+        .modal-content {
+            background: #1e293b;
+            border-radius: 40px;
+            padding: 24px;
+            width: 90%;
+            max-width: 480px;
+            color: white;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        .admin-input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 40px;
+            background: #0f172a;
+            border: 1px solid #475569;
+            color: white;
+        }
+        .admin-btn {
+            background: #3b82f6;
+            border: none;
+            padding: 12px;
+            border-radius: 40px;
+            width: 100%;
+            margin-top: 10px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .product-item {
+            background: #0f172a;
+            padding: 14px;
+            border-radius: 24px;
+            margin-bottom: 14px;
+        }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .toast {
+            position: fixed;
+            bottom: 90px;
+            left: 20px;
+            background: #1e293bdd;
+            backdrop-filter: blur(8px);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 40px;
+            font-size: 14px;
+            z-index: 1100;
+            opacity: 0;
+            transition: 0.2s;
+        }
+        .user-info {
+            background: #f1f5f9;
+            border-radius: 60px;
+            padding: 6px 14px;
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 13px;
+            color: #1e293b;
+        }
+        hr { margin: 12px 0; border-color: #e2e8f0; }
+    </style>
+</head>
+<body>
+<div class="container" id="app">
+    <div class="card header">
+        <div class="shop-title">🛍️ تریا شاپ</div>
+        <p>استارز، گیفت و کادوهای تلگرامی</p>
+        <div id="userInfo" class="user-info"></div>
+    </div>
+    <div id="productsList"></div>
+</div>
+
+<div class="admin-panel" id="adminPanelBtn">
+    <i class="fas fa-cog fa-lg"></i>
+</div>
+
+<div id="adminModal" class="modal">
+    <div class="modal-content">
+        <h3>🔧 پنل مدیریت</h3>
+        <input type="password" id="adminPassword" class="admin-input" placeholder="رمز مدیریت">
+        <button class="admin-btn" onclick="loginAdmin()">ورود</button>
+        <div id="adminContent" style="display: none; margin-top: 20px;"></div>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    // ========== تنظیمات اولیه (حتماً تغییر بده) ==========
+    const BOT_USERNAME = "taryashop_bot";       // یوزرنیم ربات (بدون @)
+    const API_URL = "http://localhost:5000";     // آدرس سرور API (همون جایی که ربات اجرا میشه)
+    
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+    
+    let user = tg.initDataUnsafe?.user;
+    let userId = user ? user.id : null;
+    let isAdmin = false;
+    let products = [];
+    
+    // توالت (پیام کوتاه)
+    function showToast(msg) {
+        let toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.style.opacity = '1';
+        setTimeout(() => toast.style.opacity = '0', 2500);
+    }
+    
+    // دریافت اطلاعات کاربر از API ربات
+    async function loadUserInfo() {
+        if (!userId) {
+            document.getElementById('userInfo').innerHTML = '⚠️ ابتدا ربات را باز کنید';
+            return;
+        }
+        try {
+            const res = await fetch(`${API_URL}/api/user_info?user_id=${userId}`);
+            const data = await res.json();
+            if (data.error) return;
+            let status = data.verified_gold ? '💎 طلایی' : (data.verified_basic ? '✅ پایه' : '🔐未 احراز');
+            document.getElementById('userInfo').innerHTML = `💰 ${data.balance.toLocaleString()} تومان | ${status}`;
+        } catch(e) {
+            console.log(e);
+            document.getElementById('userInfo').innerHTML = '⚠️ اتصال به سرور برقرار نیست';
+        }
+    }
+    
+    // دریافت لیست محصولات از API ربات
+    async function loadProducts() {
+        try {
+            const res = await fetch(`${API_URL}/api/products`);
+            products = await res.json();
+            renderProducts();
+        } catch(e) {
+            console.log(e);
+            showToast('خطا در دریافت محصولات');
+        }
+    }
+    
+    // نمایش محصولات در صفحه
+    function renderProducts() {
+        let html = '';
+        for (let p of products) {
+            const disabledAttr = !p.available ? 'disabled' : '';
+            const opacityStyle = !p.available ? 'style="opacity:0.6;"' : '';
+            html += `
+                <div class="card">
+                    <div class="product">
+                        <div class="product-info">
+                            <h3>${p.name}</h3>
+                            <div class="product-price">${p.price.toLocaleString()} تومان</div>
+                            <div class="stock-badge">📦 موجودی: ${p.stock} | حداقل سفارش: ${p.min_qty}</div>
+                        </div>
+                        <button class="buy-btn" onclick="buyProduct(${p.id})" ${disabledAttr} ${opacityStyle}>خرید</button>
+                    </div>
+                </div>
+            `;
+        }
+        document.getElementById('productsList').innerHTML = html;
+    }
+    
+    // خرید محصول (ارسال لینک به ربات)
+    function buyProduct(productId) {
+        if (!userId) {
+            showToast("لطفاً ابتدا ربات را باز کنید و سپس وارد مینی‌اپ شوید");
+            return;
+        }
+        const product = products.find(p => p.id === productId);
+        if (!product) return;
+        if (!product.available) {
+            showToast("این محصول در حال حاضر غیرفعال است");
+            return;
+        }
+        let qty = prompt(`تعداد مورد نظر (حداقل ${product.min_qty}):`, product.min_qty);
+        qty = parseInt(qty);
+        if (isNaN(qty) || qty < product.min_qty) {
+            showToast(`حداقل تعداد مجاز ${product.min_qty} است`);
+            return;
+        }
+        if (qty > product.stock) {
+            showToast(`فقط ${product.stock} عدد در انبار موجود است`);
+            return;
+        }
+        let method = confirm('پرداخت با کیف پول؟ (در غیر این صورت کارت به کارت)');
+        method = method ? 'wallet' : 'card';
+        const url = `https://t.me/${BOT_USERNAME}?start=buy_${productId}_${qty}_${method}`;
+        tg.openTelegramLink(url);
+        tg.close();
+    }
+    
+    // ========== پنل مدیریت ==========
+    document.getElementById('adminPanelBtn').onclick = () => {
+        document.getElementById('adminModal').classList.add('open');
+    };
+    
+    function loginAdmin() {
+        const pwd = document.getElementById('adminPassword').value;
+        if (pwd === 'arash112') {
+            isAdmin = true;
+            document.getElementById('adminContent').style.display = 'block';
+            renderAdminPanel();
+        } else {
+            showToast('رمز اشتباه است');
+        }
+    }
+    
+    function renderAdminPanel() {
+        let html = '<h4>📦 مدیریت محصولات</h4><hr>';
+        for (let p of products) {
+            html += `
+                <div class="product-item">
+                    <div class="flex-between">
+                        <div>
+                            <strong>${p.name}</strong><br>
+                            <small>موجودی فعلی: ${p.stock}</small><br>
+                            <small>وضعیت: ${p.available ? 'فعال' : 'غیرفعال'}</small>
+                        </div>
+                        <div>
+                            <button class="admin-btn" style="background:#ef4444; width:auto; padding:6px 12px;" onclick="toggleAvailability(${p.id}, ${!p.available})">${p.available ? 'غیرفعال' : 'فعال'}</button>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:8px; margin-top:12px;">
+                        <input type="number" id="stock_${p.id}" value="${p.stock}" class="admin-input" style="width:100px;">
+                        <button class="admin-btn" style="width:auto; padding:6px 12px;" onclick="updateStock(${p.id})">به‌روزرسانی موجودی</button>
+                    </div>
+                </div>
+            `;
+        }
+        html += '<hr><button class="admin-btn" onclick="closeAdminModal()">بستن پنل</button>';
+        document.getElementById('adminContent').innerHTML = html;
+    }
+    
+    async function updateStock(productId) {
+        const stock = parseInt(document.getElementById(`stock_${productId}`).value);
+        if (isNaN(stock) || stock < 0) {
+            showToast('موجودی نامعتبر');
+            return;
+        }
+        try {
+            const res = await fetch(`${API_URL}/api/update_stock`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: 'arash112', product_id: productId, stock })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast('موجودی بروزرسانی شد');
+                loadProducts();    // بارگذاری مجدد لیست محصولات
+                renderAdminPanel(); // به‌روزرسانی پنل
+            } else {
+                showToast('خطا در بروزرسانی');
+            }
+        } catch(e) {
+            showToast('خطا در ارتباط با سرور');
+        }
+    }
+    
+    async function toggleAvailability(productId, newStatus) {
+        try {
+            const res = await fetch(`${API_URL}/api/update_availability`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: 'arash112', product_id: productId, available: newStatus ? 1 : 0 })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast(newStatus ? 'محصول فعال شد' : 'محصول غیرفعال شد');
+                loadProducts();
+                renderAdminPanel();
+            } else {
+                showToast('خطا');
+            }
+        } catch(e) {
+            showToast('خطا در ارتباط با سرور');
+        }
+    }
+    
+    function closeAdminModal() {
+        document.getElementById('adminModal').classList.remove('open');
+    }
+    
+    // اجرای اولیه
+    loadUserInfo();
+    loadProducts();
+    
+    // هر 30 ثانیه یکبار اطلاعات کاربر و محصولات به‌روز می‌شود
+    setInterval(() => {
+        loadUserInfo();
+        loadProducts();
+    }, 30000);
+</script>
+</body>
+</html>
