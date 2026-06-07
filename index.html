@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>ARSHA SHOP | کیف پول طلایی</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(ellipse at 30% 40%, #2b2b2b, #0a0a0a);
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* انیمیشن گرادیان متحرک پس‌زمینه */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(125deg, rgba(50,50,70,0.3), rgba(20,20,40,0.6));
+            animation: slowWave 18s infinite alternate;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes slowWave {
+            0% { opacity: 0.4; transform: scale(1);}
+            100% { opacity: 0.9; transform: scale(1.08);}
+        }
+
+        /* ذرات گرد و غبار طلایی */
+        .dust-particle {
+            position: fixed;
+            background: rgba(255, 200, 100, 0.2);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            animation: floatDust 12s infinite linear;
+        }
+
+        @keyframes floatDust {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            20% { opacity: 0.5; }
+            80% { opacity: 0.3; }
+            100% { transform: translateY(-20vh) rotate(360deg); opacity: 0; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* کارت شیشه‌ای با براقیت بالا */
+        .glass-card {
+            background: rgba(20, 20, 35, 0.65);
+            backdrop-filter: blur(20px);
+            border-radius: 64px;
+            padding: 28px 24px;
+            margin-bottom: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 30px 45px -15px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 35px 50px -18px black;
+        }
+
+        /* هدر */
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            text-align: center;
+            background: linear-gradient(135deg, #ffd966, #ffaa33);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-bottom: 20px;
+        }
+
+        /* موجودی */
+        .balance-card {
+            background: rgba(0,0,0,0.5);
+            border-radius: 60px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .balance-label {
+            font-size: 1rem;
+            letter-spacing: 2px;
+            font-weight: 500;
+        }
+        .balance-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #ffea9e;
+            text-shadow: 0 0 12px rgba(255,200,0,0.4);
+            word-break: break-word;
+        }
+
+        /* بخش خدمات */
+        .services-row {
+            display: flex;
+            gap: 16px;
+            margin: 20px 0 10px;
+        }
+        .serv-btn {
+            flex: 1;
+            background: linear-gradient(145deg, #2e3b4e, #1a2538);
+            border: none;
+            padding: 16px 0;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 5px 12px black;
+        }
+        .serv-btn:active {
+            transform: scale(0.96);
+        }
+        .serv-btn.star { background: linear-gradient(145deg, #4a4a6a, #2a2a4a); }
+        .serv-btn.gift { background: linear-gradient(145deg, #6a4a6a, #3a2a3a); }
+        .serv-btn.tone { background: linear-gradient(145deg, #4a6a6a, #2a4a4a); }
+
+        /* وضعیت احراز با بج */
+        .verify-status {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0,0,0,0.4);
+            border-radius: 50px;
+            padding: 12px 18px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(30,30,45,0.9);
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+        }
+        .badge.approved { border-right: 3px solid #2ecc71; color: #a3ffa3; }
+        .badge.rejected { border-right: 3px solid #e74c3c; }
+
+        /* دکمه‌های عملیاتی */
+        .action-buttons {
+            display: flex;
+            gap: 14px;
+            margin: 15px 0;
+        }
+        .action {
+            background: #2a6df4;
+            border: none;
+            padding: 12px 0;
+            border-radius: 60px;
+            font-weight: bold;
+            width: 50%;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .action.purple { background: #8e44ad; }
+
+        /* لیست کارت‌ها */
+        .card-list {
+            margin-top: 15px;
+        }
+        .card-row {
+            background: rgba(0,0,0,0.5);
+            border-radius: 70px;
+            padding: 12px 18px;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,215,0,0.2);
+        }
+        .card-number {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            direction: ltr;
+        }
+        .copy-button {
+            background: #2a6df4;
+            border: none;
+            padding: 6px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.1s linear;
+        }
+        .copy-button:active {
+            transform: scale(0.94);
+        }
+
+        /* دکمه پشتیبانی بزرگ */
+        .support-btn {
+            width: 100%;
+            background: linear-gradient(95deg, #3a3a55, #2a2a3a);
+            border: 1px solid #ffd966;
+            border-radius: 80px;
+            padding: 16px;
+            font-weight: bold;
+            font-size: 1rem;
+            color: #ffd966;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.2s;
+        }
+        .support-btn:active {
+            transform: scale(0.97);
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            opacity: 0.4;
+            margin-top: 30px;
+        }
+
+        /* اسکلت لودینگ */
+        .skeleton {
+            background: linear-gradient(90deg, #2c2c3a 25%, #424256 50%, #2c2c3a 75%);
+            background-size: 200% auto;
+            animation: shimmer 1.4s infinite;
+            border-radius: 60px;
+            height: 58px;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body>
+<div id="particles"></div>
+<div class="container">
+    <div class="glass-card">
+        <div class="logo">✨ ARSH SAFARI</div>
+        <div class="subtitle">خدمات ویژه و کیف پول طلایی</div>
+        <div class="balance-card">
+            <div class="balance-label">💰 موجودی قابل استفاده</div>
+            <div class="balance-value" id="walletValue">0 تومان</div>
+        </div>
+    </div>
+
+    <div class="glass-card">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-weight: bold;">
+            <span>⭐ استارز</span> <span>🎁 گیفت</span> <span>🎵 تون صوتی</span>
+        </div>
+        <div class="services-row">
+            <button class="serv-btn star" id="btnStars">⭐ خرید</button>
+            <button class="serv-btn gift" id="btnGift">🎁 خرید</button>
+            <button class="serv-btn tone" id="btnTone">🎵 خرید</button>
+        </div>
+    </div>
+
+    <div class="glass-card">
+        <div class="verify-status">
+            <span id="basicBadge" class="badge">🔒 احراز پایه: --</span>
+            <span id="goldBadge" class="badge">👑 احراز طلایی: --</span>
+        </div>
+        <div class="action-buttons">
+            <button class="action" id="basicAuthBtn">📸 ثبت درخواست پایه</button>
+            <button class="action purple" id="goldAuthBtn">✨ ثبت درخواست طلایی</button>
+        </div>
+    </div>
+
+    <div class="glass-card">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+            <strong>💳 شماره کارت‌های واریز</strong>
+            <span style="font-size: 0.7rem;">(فقط پس از احراز پایه)</span>
+        </div>
+        <div id="cardsContainer">
+            <div class="skeleton"></div>
+            <div class="skeleton"></div>
+        </div>
+    </div>
+
+    <button id="supportButton" class="support-btn">📞 پشتیبانی و ارتباط با ادمین</button>
+    <footer>شارژ کیف پول و ارسال رسید فقط در ربات انجام می‌شود.</footer>
+</div>
+
+<script>
+    (function createParticles() {
+        const container = document.getElementById('particles');
+        for (let i = 0; i < 60; i++) {
+            let p = document.createElement('div');
+            p.classList.add('dust-particle');
+            let size = Math.random() * 9 + 2;
+            p.style.width = size + 'px';
+            p.style.height = size + 'px';
+            p.style.left = Math.random() * 100 + '%';
+            p.style.animationDuration = Math.random() * 18 + 8 + 's';
+            p.style.animationDelay = Math.random() * 12 + 's';
+            container.appendChild(p);
+        }
+    })();
+
+    let tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.enableClosingConfirmation();
+    let userId = tg.initDataUnsafe?.user?.id;
+    if (!userId) alert("⚠️ لطفاً از طریق ربات وارد مینی اپ شوید");
+
+    const BOT_USERNAME = "Taryashopbot";
+    function openBot(action) {
+        tg.openTelegramLink(`https://t.me/${BOT_USERNAME}?start=${action}`);
+    }
+
+    async function fetchUserData() {
+        try {
+            let fd = new FormData();
+            fd.append('user_id', userId);
+            let resp = await fetch('/api/get_user', { method: 'POST', body: fd });
+            let data = await resp.json();
+            if (data.balance !== undefined) {
+                // موجودی
+                document.getElementById('walletValue').innerText = data.balance.toLocaleString() + ' تومان';
+                // وضعیت احراز
+                const basicSpan = document.getElementById('basicBadge');
+                const goldSpan = document.getElementById('goldBadge');
+                basicSpan.innerHTML = data.basic_verified ? '✅ احراز پایه: تایید شده' : '❌ احراز پایه: تایید نشده';
+                goldSpan.innerHTML = data.gold_verified ? '✅ احراز طلایی: تایید شده' : '❌ احراز طلایی: تایید نشده';
+                if (data.basic_verified) basicSpan.classList.add('approved');
+                if (data.gold_verified) goldSpan.classList.add('approved');
+
+                // نمایش کارت‌ها فقط در صورت احراز پایه
+                const cardsDiv = document.getElementById('cardsContainer');
+                if (data.basic_verified) {
+                    if (data.cards && data.cards.length) {
+                        let html = '';
+                        for (let card of data.cards) {
+                            html += `
+                                <div class="card-row">
+                                    <span class="card-number" dir="ltr">${card.card_number}</span>
+                                    <button class="copy-button" data-card="${card.card_number}">📋 کپی</button>
+                                </div>
+                            `;
+                        }
+                        cardsDiv.innerHTML = html;
+                        // اتصال رویداد کپی
+                        document.querySelectorAll('.copy-button').forEach(btn => {
+                            btn.addEventListener('click', (e) => {
+                                let num = btn.getAttribute('data-card');
+                                if (num) {
+                                    navigator.clipboard.writeText(num);
+                                    tg.showAlert(`✅ شماره کارت ${num} کپی شد`);
+                                    btn.style.transform = 'scale(0.95)';
+                                    setTimeout(() => btn.style.transform = '', 120);
+                                }
+                            });
+                        });
+                    } else {
+                        cardsDiv.innerHTML = '<div class="card-row" style="justify-content:center;">⚠️ هیچ کارتی ثبت نشده است</div>';
+                    }
+                } else {
+                    cardsDiv.innerHTML = '<div class="card-row" style="justify-content:center;">🔒 ابتدا احراز پایه را تکمیل کنید تا کارت‌ها نمایش داده شوند</div>';
+                }
+            }
+        } catch(e) {
+            console.error(e);
+            document.getElementById('cardsContainer').innerHTML = '<div class="card-row" style="justify-content:center;">🔌 خطا در ارتباط با سرور</div>';
+        }
+    }
+
+    // اتصال دکمه‌ها
+    document.getElementById('btnStars').onclick = () => openBot('stars');
+    document.getElementById('btnGift').onclick = () => openBot('gift');
+    document.getElementById('btnTone').onclick = () => openBot('tone');
+    document.getElementById('basicAuthBtn').onclick = () => openBot('basic_auth');
+    document.getElementById('goldAuthBtn').onclick = () => openBot('gold_auth');
+    document.getElementById('supportButton').onclick = () => openBot('support');
+
+    fetchUserData();
+    setInterval(fetchUserData, 7000);
+</script>
+</body>
+</html>
