@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>تریاشاپ | فروشگاه استارز و گیفت</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(-45deg, #e0e0e0, #f5f5f5, #ffffff, #e8e8e8);
+            background-size: 400% 400%;
+            animation: grayFlow 15s ease infinite;
+            padding: 20px;
+            direction: rtl;
+        }
+
+        @keyframes grayFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 550px;
+            margin: 0 auto;
+        }
+
+        /* کارت‌های شیشه‌ای */
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(4px);
+            border-radius: 32px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+        }
+
+        /* هدر */
+        .header {
+            text-align: center;
+            background: white;
+            border-bottom: 3px solid #ff6a00;
+        }
+
+        .shop-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ff6a00;
+            letter-spacing: -0.5px;
+        }
+
+        .user-info {
+            background: #f1f5f9;
+            border-radius: 60px;
+            padding: 6px 16px;
+            display: inline-block;
+            margin-top: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #1e293b;
+        }
+
+        /* محصول */
+        .product-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .product-info {
+            flex: 2;
+        }
+
+        .product-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .product-price {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #ff6a00;
+            margin: 5px 0;
+        }
+
+        .product-stock {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .product-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f1f5f9;
+            padding: 5px 12px;
+            border-radius: 60px;
+        }
+
+        .quantity-btn {
+            background: #e2e8f0;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        .quantity-btn:active {
+            transform: scale(0.9);
+        }
+
+        .quantity-input {
+            width: 50px;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            background: transparent;
+            font-family: monospace;
+        }
+
+        .buy-btn {
+            background: linear-gradient(95deg, #ff6a00, #ff8c2e);
+            border: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 14px;
+            color: white;
+            cursor: pointer;
+            transition: 0.1s;
+            width: 100%;
+        }
+
+        .buy-btn:active {
+            transform: scale(0.96);
+        }
+
+        .buy-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* روش پرداخت */
+        .payment-methods {
+            margin-top: 15px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .payment-btn {
+            flex: 1;
+            background: #e2e8f0;
+            border: none;
+            padding: 10px;
+            border-radius: 40px;
+            font-weight: 600;
+            color: #1e293b;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        .payment-btn.active {
+            background: #ff6a00;
+            color: white;
+        }
+
+        .confirm-btn {
+            background: #10b981;
+            width: 100%;
+            margin-top: 15px;
+            padding: 12px;
+            font-size: 1rem;
+        }
+
+        /* مودال مدیریت */
+        .admin-fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1e293b;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 100;
+            transition: 0.2s;
+        }
+
+        .admin-fab:active {
+            transform: scale(0.94);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+
+        .modal.open {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: #1e293b;
+            border-radius: 48px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            color: white;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .admin-input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 40px;
+            background: #0f172a;
+            border: 1px solid #475569;
+            color: white;
+        }
+
+        .admin-btn {
+            background: #3b82f6;
+            border: none;
+            padding: 10px;
+            border-radius: 40px;
+            width: 100%;
+            margin-top: 10px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .product-manage {
+            background: #0f172a;
+            border-radius: 28px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 90px;
+            left: 20px;
+            background: #1e293bdd;
+            backdrop-filter: blur(8px);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 60px;
+            font-size: 14px;
+            z-index: 1100;
+            opacity: 0;
+            transition: 0.2s;
+            pointer-events: none;
+        }
+
+        hr {
+            margin: 15px 0;
+            border-color: #334155;
+        }
+
+        h3 {
+            margin-bottom: 12px;
+        }
+
+        .badge {
+            background: #ff6a00;
+            padding: 2px 8px;
+            border-radius: 60px;
+            font-size: 11px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="app">
+    <!-- هدر -->
+    <div class="card header">
+        <div class="shop-title">🛍️ تریا شاپ</div>
+        <p>استارز، گیفت و کادوهای تلگرامی</p>
+        <div id="userInfo" class="user-info">👤 در حال بارگیری...</div>
+    </div>
+
+    <!-- لیست محصولات -->
+    <div id="productsContainer"></div>
+</div>
+
+<!-- دکمه شناور پنل مدیریت -->
+<div class="admin-fab" id="adminFab">
+    <i class="fas fa-cog fa-lg"></i>
+</div>
+
+<!-- مودال پنل مدیریت -->
+<div id="adminModal" class="modal">
+    <div class="modal-content">
+        <h3>🔧 پنل مدیریت</h3>
+        <input type="password" id="adminPassword" class="admin-input" placeholder="رمز مدیریت">
+        <button class="admin-btn" id="adminLoginBtn">ورود</button>
+        <div id="adminPanel" style="display: none; margin-top: 20px;"></div>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- مودال خرید (برای نمایش انتخاب تعداد و روش پرداخت) -->
+<div id="buyModal" class="modal">
+    <div class="modal-content">
+        <h3 id="modalProductName"></h3>
+        <div style="margin: 15px 0;">
+            <label>🔢 تعداد:</label>
+            <div style="display: flex; align-items: center; gap: 15px; margin-top: 8px;">
+                <button id="modalQtyMinus" class="admin-btn" style="width: 45px;">-</button>
+                <span id="modalQty" style="font-size: 28px; font-weight: bold; min-width: 60px; text-align: center;">1</span>
+                <button id="modalQtyPlus" class="admin-btn" style="width: 45px;">+</button>
+                <input type="number" id="modalQtyInput" class="admin-input" style="width: 90px; text-align: center;">
+            </div>
+            <div class="product-stock" id="modalStockInfo" style="margin-top: 5px;"></div>
+        </div>
+        <div>
+            <label>💰 روش پرداخت:</label>
+            <div class="payment-methods" style="margin-top: 8px;">
+                <button id="modalPayCard" class="payment-btn">💳 کارت به کارت</button>
+                <button id="modalPayWallet" class="payment-btn">💰 کیف پول</button>
+            </div>
+        </div>
+        <div style="background: #0f172a; padding: 12px; border-radius: 28px; margin: 15px 0; text-align: center;">
+            💰 مبلغ کل: <span id="modalTotalPrice" style="font-size: 24px; font-weight: bold;">0</span> تومان
+        </div>
+        <button id="modalConfirm" class="admin-btn" style="background: #10b981;">✅ نهایی کردن خرید</button>
+        <button id="modalCancel" class="admin-btn" style="background: #ef4444; margin-top: 10px;">❌ انصراف</button>
+    </div>
+</div>
+
+<script>
+    // ========== تنظیمات اولیه ==========
+    const BOT_USERNAME = "taryashop_bot";        // 👈 یوزرنیم ربات خود را اینجا وارد کنید (بدون @)
+    const ADMIN_PASSWORD = "arash112";           // رمز پنل مدیریت
+
+    // محصولات پیش‌فرض (با موجودی و قیمت)
+    let products = [
+        { id: 1, name: "⭐ 50 استارز", price: 140000, min_qty: 50, stock: 100, available: true, icon: "fa-brands fa-telegram" },
+        { id: 2, name: "💎 100 استارز (الماس)", price: 280000, min_qty: 50, stock: 80, available: true, icon: "fa-solid fa-gem" },
+        { id: 3, name: "🎁 جعبه کادو", price: 70000, min_qty: 1, stock: 200, available: true, icon: "fa-solid fa-gift" },
+        { id: 4, name: "🧸 تدی خرس", price: 40000, min_qty: 1, stock: 150, available: true, icon: "fa-solid fa-heart" },
+        { id: 5, name: "🚀 موشک", price: 140000, min_qty: 1, stock: 120, available: true, icon: "fa-solid fa-rocket" },
+        { id: 6, name: "🍹 دلستر", price: 140000, min_qty: 1, stock: 90, available: true, icon: "fa-solid fa-mug-hot" },
+        { id: 7, name: "🌹 گل", price: 140000, min_qty: 1, stock: 110, available: true, icon: "fa-solid fa-flower" },
+        { id: 8, name: "🎈 بادکنک", price: 70000, min_qty: 1, stock: 130, available: true, icon: "fa-solid fa-balloon" }
+    ];
+
+    // بارگذاری محصولات از localStorage
+    function loadProductsFromStorage() {
+        const saved = localStorage.getItem('taryashop_products');
+        if (saved) {
+            try {
+                products = JSON.parse(saved);
+            } catch(e) {}
+        } else {
+            saveProductsToStorage();
+        }
+    }
+
+    function saveProductsToStorage() {
+        localStorage.setItem('taryashop_products', JSON.stringify(products));
+    }
+
+    // دریافت اطلاعات کاربر از Telegram WebApp
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+    const user = tg.initDataUnsafe?.user;
+    const userId = user ? user.id : null;
+    const userName = user ? (user.first_name || user.username || "کاربر") : "میهمان";
+
+    // نمایش اطلاعات کاربر (ساده، فقط برای احوالپرسی)
+    function updateUserInfo() {
+        document.getElementById('userInfo').innerHTML = `👋 سلام ${userName} | 💰 کیف پول (در ربات)`;
+    }
+
+    // ========== رندر محصولات ==========
+    function renderProducts() {
+        const container = document.getElementById('productsContainer');
+        let html = '';
+        for (let p of products) {
+            const disabledClass = !p.available ? 'style="opacity:0.6;"' : '';
+            const stockText = p.stock <= 5 ? `⚠️ فقط ${p.stock} عدد باقی` : `موجودی: ${p.stock} عدد`;
+            html += `
+                <div class="card">
+                    <div class="product-card">
+                        <div class="product-info">
+                            <div class="product-name">
+                                <i class="${p.icon}" style="margin-left: 6px;"></i> ${p.name}
+                            </div>
+                            <div class="product-price">${p.price.toLocaleString()} تومان</div>
+                            <div class="product-stock">📦 ${stockText} | حداقل سفارش: ${p.min_qty}</div>
+                        </div>
+                        <div class="product-actions">
+                            <button class="buy-btn" onclick="openBuyModal(${p.id})" ${!p.available ? 'disabled' : ''}>🛒 خرید</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+    }
+
+    // ========== مودال خرید ==========
+    let currentProduct = null;
+    let currentQty = 1;
+    let currentMethod = 'card';
+
+    function openBuyModal(productId) {
+        const product = products.find(p => p.id === productId);
+        if (!product) return;
+        if (!product.available) {
+            showToast("این محصول در حال حاضر غیرفعال است");
+            return;
+        }
+        currentProduct = product;
+        currentQty = product.min_qty;
+        currentMethod = 'card';
+        document.getElementById('modalProductName').innerHTML = `<i class="${product.icon}"></i> ${product.name}`;
+        document.getElementById('modalQty').innerText = currentQty;
+        document.getElementById('modalQtyInput').value = currentQty;
+        document.getElementById('modalStockInfo').innerHTML = `موجودی: ${product.stock} | حداقل سفارش: ${product.min_qty}`;
+        updateModalTotal();
+        // تنظیم دکمه روش پرداخت فعال
+        document.getElementById('modalPayCard').classList.add('active');
+        document.getElementById('modalPayWallet').classList.remove('active');
+        document.getElementById('buyModal').classList.add('open');
+    }
+
+    function updateModalTotal() {
+        if (!currentProduct) return;
+        const total = currentProduct.price * currentQty;
+        document.getElementById('modalTotalPrice').innerText = total.toLocaleString();
+    }
+
+    function changeQty(delta) {
+        if (!currentProduct) return;
+        let newQty = currentQty + delta;
+        if (newQty < currentProduct.min_qty) newQty = currentProduct.min_qty;
+        if (newQty > currentProduct.stock) newQty = currentProduct.stock;
+        currentQty = newQty;
+        document.getElementById('modalQty').innerText = currentQty;
+        document.getElementById('modalQtyInput').value = currentQty;
+        updateModalTotal();
+    }
+
+    function setQtyFromInput() {
+        let val = parseInt(document.getElementById('modalQtyInput').value);
+        if (isNaN(val)) val = currentProduct.min_qty;
+        if (val < currentProduct.min_qty) val = currentProduct.min_qty;
+        if (val > currentProduct.stock) val = currentProduct.stock;
+        currentQty = val;
+        document.getElementById('modalQty').innerText = currentQty;
+        document.getElementById('modalQtyInput').value = currentQty;
+        updateModalTotal();
+    }
+
+    function setMethod(method) {
+        currentMethod = method;
+        if (method === 'card') {
+            document.getElementById('modalPayCard').classList.add('active');
+            document.getElementById('modalPayWallet').classList.remove('active');
+        } else {
+            document.getElementById('modalPayWallet').classList.add('active');
+            document.getElementById('modalPayCard').classList.remove('active');
+        }
+    }
+
+    function finalizePurchase() {
+        if (!currentProduct) return;
+        if (currentQty < currentProduct.min_qty) {
+            showToast(`حداقل تعداد ${currentProduct.min_qty} است`);
+            return;
+        }
+        if (currentQty > currentProduct.stock) {
+            showToast(`فقط ${currentProduct.stock} عدد موجود است`);
+            return;
+        }
+        // ساخت لینک دیپ‌لینک برای ربات
+        const url = `https://t.me/${BOT_USERNAME}?start=buy_${currentProduct.id}_${currentQty}_${currentMethod}`;
+        tg.openTelegramLink(url);
+        closeBuyModal();
+        tg.close(); // بستن مینی‌اپ بعد از کلیک
+    }
+
+    function closeBuyModal() {
+        document.getElementById('buyModal').classList.remove('open');
+    }
+
+    // ========== پنل مدیریت ==========
+    let isAdminLoggedIn = false;
+
+    function openAdminModal() {
+        document.getElementById('adminModal').classList.add('open');
+        document.getElementById('adminPassword').value = '';
+        document.getElementById('adminPanel').style.display = 'none';
+    }
+
+    function loginAdmin() {
+        const pwd = document.getElementById('adminPassword').value;
+        if (pwd === ADMIN_PASSWORD) {
+            isAdminLoggedIn = true;
+            document.getElementById('adminPanel').style.display = 'block';
+            renderAdminPanel();
+        } else {
+            showToast("رمز اشتباه است");
+        }
+    }
+
+    function renderAdminPanel() {
+        let html = '<h4>📦 مدیریت محصولات</h4><hr>';
+        for (let p of products) {
+            html += `
+                <div class="product-manage">
+                    <div class="flex-between">
+                        <div>
+                            <strong><i class="${p.icon}"></i> ${p.name}</strong><br>
+                            <small>قیمت: ${p.price.toLocaleString()} تومان</small><br>
+                            <small>موجودی: ${p.stock} | حداقل: ${p.min_qty}</small><br>
+                            <small>وضعیت: ${p.available ? 'فعال' : 'غیرفعال'}</small>
+                        </div>
+                        <div>
+                            <button class="admin-btn" style="background:#ef4444; width:auto; padding:6px 12px;" onclick="toggleAvailability(${p.id}, ${!p.available})">${p.available ? 'غیرفعال' : 'فعال'}</button>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
+                        <div style="flex:1;">
+                            <label style="font-size:12px;">موجودی جدید:</label>
+                            <input type="number" id="stock_${p.id}" value="${p.stock}" class="admin-input" style="margin:0;">
+                        </div>
+                        <div style="flex:1;">
+                            <label style="font-size:12px;">قیمت جدید (تومان):</label>
+                            <input type="number" id="price_${p.id}" value="${p.price}" class="admin-input" style="margin:0;">
+                        </div>
+                        <div style="flex:1;">
+                            <label style="font-size:12px;">حداقل تعداد:</label>
+                            <input type="number" id="minqty_${p.id}" value="${p.min_qty}" class="admin-input" style="margin:0;">
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:8px; margin-top:12px;">
+                        <button class="admin-btn" onclick="updateProduct(${p.id})">💾 ذخیره تغییرات</button>
+                    </div>
+                </div>
+            `;
+        }
+        html += '<hr><button class="admin-btn" onclick="closeAdminModal()">بستن پنل</button>';
+        document.getElementById('adminPanel').innerHTML = html;
+    }
+
+    function updateProduct(id) {
+        const newStock = parseInt(document.getElementById(`stock_${id}`).value);
+        const newPrice = parseInt(document.getElementById(`price_${id}`).value);
+        const newMinQty = parseInt(document.getElementById(`minqty_${id}`).value);
+        if (isNaN(newStock) || isNaN(newPrice) || isNaN(newMinQty)) {
+            showToast("مقادیر نامعتبر");
+            return;
+        }
+        const index = products.findIndex(p => p.id === id);
+        if (index !== -1) {
+            products[index].stock = newStock;
+            products[index].price = newPrice;
+            products[index].min_qty = newMinQty;
+            saveProductsToStorage();
+            renderProducts();
+            renderAdminPanel(); // به‌روزرسانی پنل
+            showToast("تغییرات ذخیره شد");
+        }
+    }
+
+    function toggleAvailability(id, newStatus) {
+        const index = products.findIndex(p => p.id === id);
+        if (index !== -1) {
+            products[index].available = newStatus;
+            saveProductsToStorage();
+            renderProducts();
+            renderAdminPanel();
+            showToast(newStatus ? "محصول فعال شد" : "محصول غیرفعال شد");
+        }
+    }
+
+    function closeAdminModal() {
+        document.getElementById('adminModal').classList.remove('open');
+    }
+
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.style.opacity = '1';
+        setTimeout(() => toast.style.opacity = '0', 2500);
+    }
+
+    // ========== راه‌اندازی اولیه ==========
+    function init() {
+        loadProductsFromStorage();
+        renderProducts();
+        updateUserInfo();
+        // اتصال رویدادها
+        document.getElementById('adminFab').onclick = openAdminModal;
+        document.getElementById('adminLoginBtn').onclick = loginAdmin;
+
+        document.getElementById('modalQtyMinus').onclick = () => changeQty(-1);
+        document.getElementById('modalQtyPlus').onclick = () => changeQty(1);
+        document.getElementById('modalQtyInput').onchange = setQtyFromInput;
+        document.getElementById('modalPayCard').onclick = () => setMethod('card');
+        document.getElementById('modalPayWallet').onclick = () => setMethod('wallet');
+        document.getElementById('modalConfirm').onclick = finalizePurchase;
+        document.getElementById('modalCancel').onclick = closeBuyModal;
+    }
+
+    init();
+</script>
+</body>
+</html>
