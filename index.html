@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>فروشگاه Jigar Tunnel</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Tahoma, sans-serif; }
+        body { background: var(--tg-theme-bg-color, #ffffff); color: var(--tg-theme-text-color, #000000); padding: 16px; padding-bottom: 80px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .card { background: var(--tg-theme-secondary-bg-color, #f5f5f5); border-radius: 20px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .plan { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--tg-theme-hint-color, #ddd); padding: 12px 0; }
+        .price { font-weight: bold; color: var(--tg-theme-button-color, #2c7da0); }
+        button, .btn { background: var(--tg-theme-button-color, #2c7da0); color: white; border: none; padding: 10px 16px; border-radius: 14px; font-size: 14px; font-weight: 500; cursor: pointer; width: 100%; margin-top: 8px; }
+        input, select, textarea { width: 100%; padding: 10px; margin: 8px 0; border-radius: 14px; border: 1px solid #ccc; background: var(--tg-theme-bg-color, white); color: var(--tg-theme-text-color, black); }
+        .tab-bar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; position: sticky; top: 0; background: var(--tg-theme-bg-color, #ffffff); padding: 8px 0; z-index: 100; }
+        .tab { flex: 1; text-align: center; padding: 8px 4px; background: var(--tg-theme-secondary-bg-color, #e9ecef); border-radius: 30px; cursor: pointer; font-size: 13px; }
+        .tab.active { background: var(--tg-theme-button-color, #2c7da0); color: white; }
+        .hidden { display: none; }
+        .toast { position: fixed; bottom: 20px; left: 20px; right: 20px; background: #333333dd; backdrop-filter: blur(8px); color: white; padding: 12px; border-radius: 16px; text-align: center; z-index: 1000; }
+        @media (prefers-color-scheme: dark) { .card { background: #1e1e2e; } .tab { background: #2a2a3a; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="tab-bar">
+        <div class="tab active" data-tab="plans">🛒 خرید</div>
+        <div class="tab" data-tab="profile">👤 حساب</div>
+        <div class="tab" data-tab="tickets">🎫 تیکت‌ها</div>
+        <div class="tab" data-tab="history">📜 تراکنش</div>
+        <div class="tab" data-tab="track">🔍 پیگیری</div>
+    </div>
+    <div id="plans-page" class="page"><div id="plans-list" class="card"></div><div id="cart" class="card hidden"><h3>🛒 سبد خرید</h3><p>📦 پلن: <strong id="cart-plan"></strong></p><p>🔢 تعداد: <input type="number" id="cart-qty" min="1" value="1"></p><p>💰 قیمت اصلی: <span id="cart-original"></span> تومان</p><p>🎫 کد تخفیف: <input type="text" id="discount-code" placeholder="اختیاری"></p><p>💎 قیمت نهایی: <span id="cart-final"></span> تومان</p><button id="apply-discount-btn">✨ اعمال تخفیف</button><button id="pay-card-btn">💳 کارت به کارت</button><button id="pay-wallet-btn">💰 کیف پول</button><button id="cancel-cart-btn" style="background: gray;">🔙 انصراف</button></div></div>
+    <div id="profile-page" class="page hidden"><div class="card"><p>📧 ایمیل: <span id="profile-email">-</span></p><p>💰 موجودی: <span id="profile-balance">0</span> تومان</p><p>📦 پلن فعال: <span id="profile-plan">هیچ</span></p><p>⏳ روز باقیمانده: <span id="profile-days">0</span></p><button id="disable-account-btn">🔒 غیرفعال کردن حساب</button><button id="charge-wallet-btn">➕ شارژ کیف پول</button></div></div>
+    <div id="tickets-page" class="page hidden"><div class="card"><button id="new-ticket-btn">➕ تیکت جدید</button><div id="tickets-list">در حال بارگذاری...</div></div><div id="ticket-detail" class="card hidden"><h3 id="ticket-title"></h3><div id="ticket-messages" style="max-height:300px;overflow-y:auto;"></div><textarea id="ticket-reply" rows="3" placeholder="پیام شما..."></textarea><button id="send-ticket-reply">📨 ارسال پاسخ</button><button id="close-ticket-btn" style="background:#dc3545;">🔒 بستن تیکت</button><button id="back-tickets-btn" style="background:gray;">🔙 بازگشت</button></div></div>
+    <div id="history-page" class="page hidden"><div class="card"><div id="history-list">در حال بارگذاری...</div></div></div>
+    <div id="track-page" class="page hidden"><div class="card"><input type="text" id="track-code" placeholder="کد پیگیری"><button id="track-btn">🔍 پیگیری</button><div id="track-result"></div></div></div>
+</div>
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    let currentPlan = null, currentOriginal = 0;
+    function showToast(msg){ let t=document.createElement('div'); t.className='toast'; t.innerText=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),3000); }
+    function sendToBot(action,data={}){ tg.sendData(JSON.stringify({action,...data})); showToast("درخواست ارسال شد. نتیجه در پیام ربات."); }
+    async function loadPlans(){
+        const plansDiv=document.getElementById('plans-list');
+        plansDiv.innerHTML='<div>⏳ بارگذاری...</div>';
+        const plans=[{key:"10",name:"10 گیگ",price:90000},{key:"20",name:"20 گیگ",price:180000},{key:"30",name:"30 گیگ",price:270000},{key:"50",name:"50 گیگ",price:450000}];
+        let html='';
+        for(let p of plans) html+=`<div class="plan"><span>${p.name}</span><span class="price">${p.price.toLocaleString()} تومان</span><button class="select-plan" data-key="${p.key}" data-name="${p.name}" data-price="${p.price}">انتخاب</button></div>`;
+        plansDiv.innerHTML=html;
+        document.querySelectorAll('.select-plan').forEach(btn=>btn.addEventListener('click',()=>{ currentPlan=btn.dataset.key; currentOriginal=parseInt(btn.dataset.price); document.getElementById('cart-plan').innerText=btn.dataset.name; document.getElementById('cart-original').innerText=currentOriginal.toLocaleString(); document.getElementById('cart-final').innerText=currentOriginal.toLocaleString(); document.getElementById('cart').classList.remove('hidden'); document.getElementById('plans-list').style.display='none'; }));
+    }
+    document.getElementById('apply-discount-btn')?.addEventListener('click',()=>{ let code=document.getElementById('discount-code').value.trim(); if(!code){ showToast("کد تخفیف را وارد کنید"); return; } let qty=parseInt(document.getElementById('cart-qty').value)||1; sendToBot("apply_discount",{code:code,amount:currentOriginal*qty}); });
+    document.getElementById('pay-card-btn')?.addEventListener('click',()=>{ let qty=parseInt(document.getElementById('cart-qty').value)||1; let discount=document.getElementById('discount-code').value.trim()||null; sendToBot("create_order",{plan:currentPlan,qty:qty,discount:discount,method:"card"}); document.getElementById('cart').classList.add('hidden'); document.getElementById('plans-list').style.display='block'; });
+    document.getElementById('pay-wallet-btn')?.addEventListener('click',()=>{ let qty=parseInt(document.getElementById('cart-qty').value)||1; let discount=document.getElementById('discount-code').value.trim()||null; sendToBot("create_order",{plan:currentPlan,qty:qty,discount:discount,method:"wallet"}); document.getElementById('cart').classList.add('hidden'); document.getElementById('plans-list').style.display='block'; });
+    document.getElementById('cancel-cart-btn')?.addEventListener('click',()=>{ document.getElementById('cart').classList.add('hidden'); document.getElementById('plans-list').style.display='block'; });
+    document.getElementById('disable-account-btn')?.addEventListener('click',()=>{ if(confirm("آیا مطمئن هستید؟")) sendToBot("disable_account",{}); });
+    document.getElementById('charge-wallet-btn')?.addEventListener('click',()=>sendToBot("charge_wallet",{}));
+    document.getElementById('track-btn')?.addEventListener('click',()=>{ let code=document.getElementById('track-code').value.trim(); if(code) sendToBot("track_order",{tracking:code}); else showToast("کد پیگیری را وارد کنید"); });
+    document.getElementById('new-ticket-btn')?.addEventListener('click',()=>{ let title=prompt("عنوان تیکت:"); if(title){ let msg=prompt("متن مشکل:"); if(msg) sendToBot("new_ticket",{title:title,message:msg}); } });
+    function loadTickets(){ sendToBot("get_tickets",{}); document.getElementById('tickets-list').innerHTML='<div>لیست تیکت‌ها در پیام ربات.</div><button id="manual-new-ticket">➕ تیکت جدید</button>'; document.getElementById('manual-new-ticket')?.addEventListener('click',()=>{ let title=prompt("عنوان:"); if(title){ let msg=prompt("متن:"); if(msg) sendToBot("new_ticket",{title:title,message:msg}); } }); }
+    function loadHistory(){ sendToBot("wallet_history",{}); document.getElementById('history-list').innerHTML='<div>تاریخچه در پیام ربات.</div>'; }
+    function loadProfile(){ sendToBot("get_profile",{}); }
+    document.querySelectorAll('.tab').forEach(tab=>{ tab.addEventListener('click',()=>{ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); tab.classList.add('active'); const target=tab.dataset.tab; document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden')); document.getElementById(`${target}-page`).classList.remove('hidden'); if(target==='plans') loadPlans(); if(target==='profile') loadProfile(); if(target==='tickets') loadTickets(); if(target==='history') loadHistory(); }); });
+    loadPlans();
+</script>
+</body>
+</html>
