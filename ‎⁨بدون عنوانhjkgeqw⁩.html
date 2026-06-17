@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAIGER | Advanced Gaming DNS Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Vazirmatn:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --neon-red: #ff0055;
+            --neon-green: #00ff99;
+            --neon-orange: #ff9900;
+            --neon-purple: #bd00ff;
+            --bg-dark: #050508;
+            --panel-bg: rgba(20, 20, 30, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(189, 0, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 0, 85, 0.15) 0%, transparent 40%),
+                linear-gradient(rgba(5, 5, 8, 0.9), rgba(5, 5, 8, 0.9)),
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 3D Neon Header */
+        .header {
+            text-align: center;
+            padding: 2rem 1rem;
+            position: relative;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .brand {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;            font-weight: 900;
+            letter-spacing: 0.2em;
+            background: linear-gradient(45deg, var(--neon-red), var(--neon-orange), var(--neon-green), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 
+                0 0 10px rgba(189, 0, 255, 0.5),
+                0 0 20px rgba(189, 0, 255, 0.3),
+                0 0 40px rgba(255, 0, 85, 0.3);
+            animation: float 3s ease-in-out infinite;
+            transform: translateZ(50px);
+        }
+
+        .subtitle {
+            color: var(--neon-green);
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+            text-shadow: 0 0 10px var(--neon-green);
+            letter-spacing: 2px;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateZ(50px) rotateX(5deg); }
+            50% { transform: translateY(-10px) translateZ(50px) rotateX(-5deg); }
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 968px) {
+            .container { grid-template-columns: 1fr; }
+            .brand { font-size: 2.5rem; }
+        }
+
+        /* 3D Glass Panels */
+        .panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 
+                0 8px 32px 0 rgba(0, 0, 0, 0.37),                inset 0 0 20px rgba(189, 0, 255, 0.05);
+            transform-style: preserve-3d;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, var(--neon-red), var(--neon-orange), var(--neon-green), var(--neon-purple));
+            box-shadow: 0 0 15px var(--neon-purple);
+        }
+
+        .panel:hover {
+            transform: translateY(-5px) rotateX(2deg);
+            box-shadow: 
+                0 15px 40px 0 rgba(0, 0, 0, 0.5),
+                0 0 30px rgba(189, 0, 255, 0.1);
+        }
+
+        .panel-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--neon-orange);
+            text-shadow: 0 0 10px rgba(255, 153, 0, 0.5);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #aaa;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(0, 0, 0, 0.4);            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 15px rgba(0, 255, 153, 0.2);
+        }
+
+        select.form-control {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2300ff99' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 15px center;
+        }
+
+        /* 3D Button */
+        .btn-generate {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, rgba(189, 0, 255, 0.2), rgba(255, 0, 85, 0.2));
+            border: 1px solid var(--neon-purple);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 
+                0 5px 15px rgba(189, 0, 255, 0.3),
+                inset 0 0 10px rgba(189, 0, 255, 0.1);
+            transform-style: preserve-3d;
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 
+                0 10px 25px rgba(189, 0, 255, 0.5),
+                0 0 20px var(--neon-red);
+            background: linear-gradient(135deg, rgba(189, 0, 255, 0.4), rgba(255, 0, 85, 0.4));
+        }
+        .btn-generate:active {
+            transform: translateY(1px);
+        }
+
+        .btn-generate i {
+            margin-left: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Output Section */
+        .output-box {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--neon-green);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 255, 153, 0.1);
+        }
+
+        .dns-code {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.8rem;
+            color: var(--neon-green);
+            text-align: center;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px var(--neon-green);
+            margin: 15px 0;
+            word-break: break-all;
+        }
+
+        .dns-desc {
+            background: rgba(255, 153, 0, 0.1);
+            border-right: 3px solid var(--neon-orange);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #ddd;
+        }
+
+        .btn-copy {
+            background: var(--neon-green);            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 15px auto 0;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(0, 255, 153, 0.4);
+        }
+
+        .btn-copy:hover {
+            background: #fff;
+            box-shadow: 0 0 25px rgba(0, 255, 153, 0.8);
+            transform: scale(1.05);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-top: 10px;
+        }
+        .status-active { background: rgba(0, 255, 153, 0.2); color: var(--neon-green); border: 1px solid var(--neon-green); box-shadow: 0 0 10px rgba(0,255,153,0.3); }
+        .status-weak { background: rgba(255, 153, 0, 0.2); color: var(--neon-orange); border: 1px solid var(--neon-orange); animation: blink 1.5s infinite; }
+        .status-expired { background: rgba(255, 0, 85, 0.2); color: var(--neon-red); border: 1px solid var(--neon-red); text-decoration: line-through; }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* History Section */
+        .history-panel {
+            grid-column: 1 / -1;
+            margin-top: 20px;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-height: 400px;            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .history-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        .history-list::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.3);
+            border-radius: 4px;
+        }
+        .history-list::-webkit-scrollbar-thumb {
+            background: var(--neon-purple);
+            border-radius: 4px;
+        }
+
+        .history-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            gap: 15px;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--neon-purple);
+        }
+
+        .history-item.expired {
+            opacity: 0.5;
+            border-color: var(--neon-red);
+        }
+
+        .h-dns {
+            font-family: 'Orbitron', monospace;
+            color: var(--neon-green);
+            font-size: 1.1rem;
+        }
+
+        .h-info {
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+
+        .h-info span {            display: block;
+            margin-top: 4px;
+            color: var(--neon-orange);
+        }
+
+        .btn-action {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .btn-action:hover {
+            background: var(--neon-red);
+            border-color: var(--neon-red);
+            box-shadow: 0 0 10px var(--neon-red);
+        }
+
+        .btn-toggle {
+            background: rgba(0, 255, 153, 0.1);
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+        }
+        .btn-toggle:hover {
+            background: var(--neon-green);
+            color: #000;
+        }
+        .btn-toggle.off {
+            background: rgba(255, 0, 85, 0.1);
+            border-color: var(--neon-red);
+            color: var(--neon-red);
+        }
+
+        /* System Status Footer */
+        .system-status {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.4);            border-radius: 15px;
+            border: 1px solid rgba(0, 255, 153, 0.2);
+        }
+
+        .status-item {
+            text-align: center;
+        }
+
+        .status-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            color: var(--neon-green);
+            text-shadow: 0 0 10px rgba(0, 255, 153, 0.5);
+        }
+
+        .status-label {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .upgrade-banner {
+            grid-column: 1 / -1;
+            background: linear-gradient(90deg, rgba(189, 0, 255, 0.1), rgba(0, 255, 153, 0.1));
+            border: 1px solid var(--neon-purple);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 10px;
+            text-align: center;
+        }
+
+        .upgrade-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        .upgrade-item i {
+            color: var(--neon-green);
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;            padding: 20px;
+        }
+        .loading.active { display: block; }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: var(--neon-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="brand">TAIGER</div>
+        <div class="subtitle">ADVANCED ANYCAST DNS INFRASTRUCTURE</div>
+    </header>
+
+    <div class="container">
+        <!-- Configuration Panel -->
+        <div class="panel">
+            <div class="panel-title">
+                <i class="fas fa-sliders-h"></i>
+                تنظیمات پیشرفته ساخت DNS
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">1️⃣ انتخاب کشور و دیتاسنتر</label>
+                <select class="form-control" id="country">
+                    <option value="NL">🇳🇱 هلند (Serverius) - Equinix Grade</option>
+                    <option value="DE">🇩🇪 آلمان (Equinix Frankfurt)</option>
+                    <option value="AE">🇦🇪 امارات (Equinix Dubai)</option>
+                    <option value="TR">🇹🇷 ترکیه (Radore)</option>
+                    <option value="GB">🇬🇧 انگلستان (London Datacenter)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">2️⃣ زمان اعتبار (دقیقه)</label>
+                <input type="number" class="form-control" id="time" value="120" min="10" max="1440">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">3️⃣ حجم مصرفی مجاز (GB)</label>
+                <input type="number" class="form-control" id="volume" value="50" min="1" max="1000">            </div>
+
+            <div class="form-group">
+                <label class="form-label">4️⃣ اپراتور هدف</label>
+                <select class="form-control" id="operator">
+                    <option value="mci">همراه اول (MCI)</option>
+                    <option value="irancell">ایرانسل (Irancell)</option>
+                    <option value="rightel">رایتل (Rightel)</option>
+                    <option value="wifi">وای‌فای (Wi-Fi)</option>
+                    <option value="samantel">سامانتل (Samantel)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">5️⃣ پروتکل شبکه</label>
+                <select class="form-control" id="protocol">
+                    <option value="ipv4">IPv4 Only</option>
+                    <option value="ipv6">IPv6 Only</option>
+                    <option value="dual">Dual Stack (IPv4 + IPv6)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">6️⃣ انتخاب هاست قدرتمند</label>
+                <select class="form-control" id="host">
+                    <option value="cf-gaming">Cloudflare Gaming DNS (Optimized)</option>
+                    <option value="bind9-ubuntu">Ubuntu 22.04 LTS + Bind9 (Low-Latency Kernel)</option>
+                    <option value="unbound">Unbound Recursive (Anti-DDoS)</option>
+                </select>
+            </div>
+
+            <button class="btn-generate" onclick="generateDNS()">
+                <i class="fas fa-bolt"></i>
+                ساخت DNS اختصاصی TAIGER
+            </button>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <div style="color: var(--neon-green); font-size: 0.9rem;">در حال اتصال به VPS و پیکربندی Bind9...</div>
+            </div>
+        </div>
+
+        <!-- Output Panel -->
+        <div class="panel">
+            <div class="panel-title">
+                <i class="fas fa-code"></i>
+                خروجی و توضیحات فنی
+            </div>
+
+            <div id="output-content" style="display: none;">                <div style="text-align: center; margin-bottom: 10px; color: #aaa; font-size: 0.9rem;">کد DNS تولید شده (IP ثابت کشور انتخابی)</div>
+                
+                <div class="output-box">
+                    <div class="dns-code" id="dns-result">---</div>
+                    <div id="status-container"></div>
+                    <button class="btn-copy" onclick="copyDNS()">
+                        <i class="fas fa-copy"></i>
+                        <span id="copy-text">کپی هوشمند</span>
+                    </button>
+                </div>
+
+                <div class="dns-desc">
+                    <strong style="color: var(--neon-orange); display: block; margin-bottom: 8px;">
+                        <i class="fas fa-info-circle"></i> توضیحات فنی DNS:
+                    </strong>
+                    <ul style="list-style: none; padding: 0;">
+                        <li>🔹 <strong>مسیر:</strong> <span id="desc-route">---</span></li>
+                        <li>🔹 <strong>پروتکل:</strong> <span id="desc-protocol">---</span></li>
+                        <li>🔹 <strong>بهینه‌سازی:</strong> Anycast Routing + QoS Gaming</li>
+                        <li>🔹 <strong>وضعیت سرور:</strong> <span style="color: var(--neon-green);">Online | Ping: <span id="desc-ping">12</span>ms</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="empty-state" style="text-align: center; padding: 40px; color: #666;">
+                <i class="fas fa-server" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i>
+                <p>هنوز DNS ای تولید نشده است.</p>
+                <p style="font-size: 0.8rem; margin-top: 10px;">پنل آماده اتصال به زیرساخت VPS است.</p>
+            </div>
+        </div>
+
+        <!-- Upgrade Banner -->
+        <div class="upgrade-banner">
+            <div class="upgrade-item"><i class="fas fa-check-circle"></i> کاهش محسوس لگ و پینگ</div>
+            <div class="upgrade-item"><i class="fas fa-check-circle"></i> افزایش دقت رجیستر تیر در نبردهای آنلاین</div>
+            <div class="upgrade-item"><i class="fas fa-check-circle"></i> اتصال پایدار برای بازی‌های رقابتی</div>
+            <div class="upgrade-item"><i class="fas fa-check-circle"></i> مناسب برای پلیرهای حرفه‌ای و رنک بالا</div>
+        </div>
+
+        <!-- History Panel -->
+        <div class="panel history-panel">
+            <div class="panel-title">
+                <i class="fas fa-history"></i>
+                تاریخچه DNS های تولید شده
+            </div>
+            <div class="history-list" id="history-list">
+                <!-- History items will be injected here -->
+                <div style="text-align: center; color: #666; padding: 20px;">تاریخچه خالی است</div>
+            </div>
+        </div>
+        <!-- System Status -->
+        <div class="system-status">
+            <div class="status-item">
+                <div class="status-value">Ubuntu 22.04 LTS</div>
+                <div class="status-label">OS Kernel: low-latency</div>
+            </div>
+            <div class="status-item">
+                <div class="status-value">Bind9 / Unbound</div>
+                <div class="status-label">DNS Resolver</div>
+            </div>
+            <div class="status-item">
+                <div class="status-value" style="color: var(--neon-green);">ACTIVE</div>
+                <div class="status-label">Cloudflare Gaming Node</div>
+            </div>
+            <div class="status-item">
+                <div class="status-value">Anycast</div>
+                <div class="status-label">Routing Protocol</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State Management
+        let dnsHistory = [];
+        let updateInterval;
+
+        // Country IP Mapping (Mock Fixed IPs for demonstration)
+        const countryIPs = {
+            'NL': { ip: '185.23.45.112', name: 'هلند (Serverius)', range: '185.23.45.x' },
+            'DE': { ip: '46.101.12.88', name: 'آلمان (Equinix Frankfurt)', range: '46.101.12.x' },
+            'AE': { ip: '94.200.85.44', name: 'امارات (Equinix Dubai)', range: '94.200.85.x' },
+            'TR': { ip: '193.141.32.99', name: 'ترکیه (Radore)', range: '193.141.32.x' },
+            'GB': { ip: '51.89.14.77', name: 'انگلستان (London)', range: '51.89.14.x' }
+        };
+
+        const operators = {
+            'mci': 'همراه اول',
+            'irancell': 'ایرانسل',
+            'rightel': 'رایتل',
+            'wifi': 'وای‌فای',
+            'samantel': 'سامانتل'
+        };
+
+        function generateDNS() {
+            const country = document.getElementById('country').value;
+            const time = parseInt(document.getElementById('time').value);
+            const volume = parseInt(document.getElementById('volume').value);
+            const operator = document.getElementById('operator').value;
+            const protocol = document.getElementById('protocol').value;            const host = document.getElementById('host').value;
+
+            // Show loading
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('output-content').style.display = 'none';
+            document.getElementById('empty-state').style.display = 'none';
+
+            // Simulate API Call to VPS (Bind9/Unbound configuration)
+            setTimeout(() => {
+                document.getElementById('loading').classList.remove('active');
+                
+                // Generate Unique DNS Code
+                const uniqueId = Math.random().toString(36).substring(2, 8).toUpperCase();
+                const dnsData = countryIPs[country];
+                const dnsAddress = `${dnsData.ip}`; // Fixed IP based on country
+                
+                const newDNS = {
+                    id: Date.now(),
+                    dns: dnsAddress,
+                    hostname: `ns1.taiger-${country.toLowerCase()}.gg`,
+                    country: dnsData.name,
+                    operator: operators[operator],
+                    protocol: protocol.toUpperCase(),
+                    host: host,
+                    timeLeft: time * 60, // seconds
+                    maxTime: time * 60,
+                    volumeLeft: volume,
+                    maxVolume: volume,
+                    status: 'active' // active, weak, expired
+                };
+
+                dnsHistory.unshift(newDNS);
+                renderOutput(newDNS);
+                renderHistory();
+                startTimers();
+
+                // Simulate VPS Log
+                console.log(`[TAIGER VPS] Provisioned DNS ${dnsAddress} for ${country} via ${host}`);
+            }, 1500);
+        }
+
+        function renderOutput(dns) {
+            document.getElementById('output-content').style.display = 'block';
+            document.getElementById('dns-result').innerText = dns.dns;
+            document.getElementById('desc-route').innerText = `${dns.country} -> ${dns.operator}`;
+            document.getElementById('desc-protocol').innerText = dns.protocol;
+            document.getElementById('desc-ping').innerText = Math.floor(Math.random() * 15) + 8; // Random low ping
+            
+            updateStatusUI(dns);
+        }
+        function updateStatusUI(dns) {
+            const container = document.getElementById('status-container');
+            let statusClass = 'status-active';
+            let statusText = 'فعال و پایدار';
+            
+            if (dns.status === 'weak') {
+                statusClass = 'status-weak';
+                statusText = 'ضعیف (نزدیک به اتمام)';
+            } else if (dns.status === 'expired') {
+                statusClass = 'status-expired';
+                statusText = 'منقضی شده';
+            }
+
+            container.innerHTML = `
+                <div style="text-align: center;">
+                    <span class="status-badge ${statusClass}">${statusText}</span>
+                    <div style="margin-top: 10px; font-size: 0.85rem; color: #aaa;">
+                        زمان باقیمانده: <span style="color: var(--neon-orange);">${formatTime(dns.timeLeft)}</span> | 
+                        حجم باقیمانده: <span style="color: var(--neon-purple);">${dns.volumeLeft.toFixed(1)} GB</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function formatTime(seconds) {
+            if (seconds <= 0) return '00:00';
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function startTimers() {
+            if (updateInterval) clearInterval(updateInterval);
+            
+            updateInterval = setInterval(() => {
+                let needsRender = false;
+                
+                dnsHistory.forEach(dns => {
+                    if (dns.status === 'expired') return;
+
+                    // Decrease time
+                    if (dns.timeLeft > 0) {
+                        dns.timeLeft--;
+                    }
+                    
+                    // Simulate volume consumption (random small amount per tick for demo)
+                    if (dns.volumeLeft > 0) {
+                        dns.volumeLeft -= 0.05; 
+                    }
+                    // Check thresholds
+                    if (dns.timeLeft <= 0 || dns.volumeLeft <= 0) {
+                        dns.status = 'expired';
+                        needsRender = true;
+                    } else if (dns.timeLeft < (dns.maxTime * 0.2) || dns.volumeLeft < (dns.maxVolume * 0.2)) {
+                        if (dns.status !== 'weak') {
+                            dns.status = 'weak';
+                            needsRender = true;
+                        }
+                    }
+                });
+
+                if (needsRender) {
+                    renderHistory();
+                    // If the currently displayed DNS is updated, refresh it
+                    const currentDisplay = dnsHistory.find(d => d.dns === document.getElementById('dns-result').innerText);
+                    if (currentDisplay) {
+                        updateStatusUI(currentDisplay);
+                    }
+                }
+            }, 1000);
+        }
+
+        function renderHistory() {
+            const list = document.getElementById('history-list');
+            if (dnsHistory.length === 0) {
+                list.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">تاریخچه خالی است</div>';
+                return;
+            }
+
+            list.innerHTML = dnsHistory.map(dns => {
+                const isExpired = dns.status === 'expired';
+                const statusColor = isExpired ? 'var(--neon-red)' : (dns.status === 'weak' ? 'var(--neon-orange)' : 'var(--neon-green)');
+                const statusText = isExpired ? 'منقضی' : (dns.status === 'weak' ? 'ضعیف' : 'فعال');
+                const toggleClass = isExpired ? 'off' : '';
+
+                return `
+                    <div class="history-item ${isExpired ? 'expired' : ''}">
+                        <div style="font-size: 1.5rem;">
+                            ${isExpired ? '🔴' : '🟢'}
+                        </div>
+                        <div>
+                            <div class="h-dns">${dns.dns}</div>
+                            <div class="h-info">
+                                ${dns.country} | ${dns.operator}
+                                <span>حجم: ${dns.volumeLeft.toFixed(1)}GB | زمان: ${formatTime(dns.timeLeft)}</span>
+                            </div>
+                        </div>
+                        <button class="btn-action btn-toggle ${toggleClass}" onclick="toggleDNS(${dns.id})" title="قطع/وصل">                            <i class="fas fa-power-off"></i>
+                        </button>
+                        <button class="btn-action" onclick="deleteDNS(${dns.id})" title="حذف">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleDNS(id) {
+            const dns = dnsHistory.find(d => d.id === id);
+            if (dns && dns.status !== 'expired') {
+                // Simulate toggle
+                dns.isActive = !dns.isActive;
+                alert(`DNS ${dns.dns} ${dns.isActive ? 'فعال' : 'غیرفعال'} شد.`);
+                renderHistory();
+            }
+        }
+
+        function deleteDNS(id) {
+            dnsHistory = dnsHistory.filter(d => d.id !== id);
+            renderHistory();
+            
+            // If the deleted one was the displayed one, clear output
+            const currentDisplay = dnsHistory.find(d => d.dns === document.getElementById('dns-result').innerText);
+            if (!currentDisplay && dnsHistory.length > 0) {
+                renderOutput(dnsHistory[0]);
+            } else if (dnsHistory.length === 0) {
+                document.getElementById('output-content').style.display = 'none';
+                document.getElementById('empty-state').style.display = 'block';
+            }
+        }
+
+        function copyDNS() {
+            const dnsText = document.getElementById('dns-result').innerText;
+            navigator.clipboard.writeText(dnsText).then(() => {
+                const btnText = document.getElementById('copy-text');
+                const originalText = btnText.innerText;
+                btnText.innerText = 'کپی شد!';
+                document.querySelector('.btn-copy').style.background = 'var(--neon-green)';
+                
+                setTimeout(() => {
+                    btnText.innerText = originalText;
+                    document.querySelector('.btn-copy').style.background = '';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('خطا در کپی. لطفاً دستی کپی کنید.');
+            });        }
+
+        // Initialize
+        renderHistory();
+    </script>
+</body>
+</html>
