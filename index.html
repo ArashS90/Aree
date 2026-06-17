@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🔥 تریا شاپ</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background: #0d1117; color: #e6edf3; padding: 12px; min-height: 100vh; }
+        .container { max-width: 480px; margin: 0 auto; }
+        .header { text-align: center; padding: 16px 0; border-bottom: 2px solid #30363d; margin-bottom: 16px; }
+        .header h1 { font-size: 28px; background: linear-gradient(135deg, #f0883e, #f0a83e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header p { color: #8b949e; font-size: 13px; margin-top: 4px; }
+        .product-card { background: #161b22; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; border: 1px solid #30363d; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .product-card .info { flex: 1; min-width: 120px; }
+        .product-card .name { font-size: 17px; font-weight: bold; color: #f0f6fc; }
+        .product-card .price { color: #3fb950; font-size: 15px; margin-top: 2px; }
+        .product-card .stock { color: #8b949e; font-size: 13px; }
+        .btn { background: #f0883e; color: #0d1117; border: none; padding: 8px 16px; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .btn:hover { background: #f09b5a; transform: scale(1.02); }
+        .btn-secondary { background: #21262d; color: #e6edf3; }
+        .btn-secondary:hover { background: #30363d; }
+        .btn-block { width: 100%; margin-top: 8px; }
+        .footer { text-align: center; padding: 16px 0; color: #484f58; font-size: 12px; border-top: 1px solid #30363d; margin-top: 16px; }
+        .footer a { color: #58a6ff; text-decoration: none; }
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #238636; color: white; padding: 10px 20px; border-radius: 8px; font-size: 14px; display: none; z-index: 100; }
+        .toast.error { background: #da3633; }
+        @media (max-width: 400px) { .header h1 { font-size: 22px; } .product-card { flex-direction: column; align-items: stretch; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔥 تریاشاپ</h1>
+            <p>✨ خرید استارز و بوست با بهترین قیمت ✨</p>
+        </div>
+        
+        <div id="productList">
+            <!-- محصولات توسط JS ساخته میشه -->
+        </div>
+        
+        <button class="btn btn-secondary btn-block" onclick="openBot()">🤖 باز کردن ربات</button>
+        
+        <div class="footer">
+            🔥 <a href="https://t.me/VELORIX_VPN" target="_blank">تریاشاپ</a> • 
+            📞 <a href="https://t.me/PW_AQ" target="_blank">پشتیبانی</a>
+        </div>
+    </div>
+    
+    <div class="toast" id="toast"></div>
+    
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        
+        // اطلاعات محصولات (همانند دیتابیس ربات)
+        const products = [
+            { id: 1, name: '⭐ 50 استارز', price: 160000, stock: 999 },
+            { id: 2, name: '🚀 بوست 7 روزه (10 عددی)', price: 60000, stock: 999 }
+        ];
+        
+        function showToast(msg, type = '') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast ' + type;
+            t.style.display = 'block';
+            clearTimeout(t._hide);
+            t._hide = setTimeout(() => { t.style.display = 'none'; }, 3000);
+        }
+        
+        function openBot() {
+            tg.openTelegramLink('https://t.me/YourBotUsername'); // اسم بات رو اینجا بذار
+        }
+        
+        function buyProduct(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
+            // ارسال دستور خرید به ربات از طریق لینک
+            const command = product.name.includes('استارز') ? '/buystars' : '/buyboost';
+            tg.openTelegramLink(`https://t.me/YourBotUsername?start=${command.substring(1)}`);
+            showToast(`✅ در حال باز کردن ربات برای خرید ${product.name}...`);
+        }
+        
+        function renderProducts() {
+            const container = document.getElementById('productList');
+            let html = '';
+            products.forEach(p => {
+                html += `
+                    <div class="product-card">
+                        <div class="info">
+                            <div class="name">${p.name}</div>
+                            <div class="price">💰 ${p.price.toLocaleString()} تومان</div>
+                            <div class="stock">📊 موجودی: ${p.stock}</div>
+                        </div>
+                        <button class="btn" onclick="buyProduct(${p.id})">🛒 خرید</button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+        
+        renderProducts();
+    </script>
+</body>
+</html>
