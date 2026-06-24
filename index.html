@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>🎯 Jigar Tunnel | پنل مدیریت</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <style>
+        /* ===== RESET ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* ===== VARIABLES ===== */
+        :root {
+            --bg-primary: #0a0a1a;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #222244;
+            --text-primary: #ffffff;
+            --text-secondary: #aaaaaa;
+            --border-color: #2a2a4a;
+            --accent: #00d4ff;
+            --accent2: #0088ff;
+            --success: #44ff88;
+            --warning: #ffcc00;
+            --danger: #ff4444;
+            --shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        
+        .light-mode {
+            --bg-primary: #f0f2f5;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #1a1a2e;
+            --text-secondary: #555555;
+            --border-color: #dddddd;
+            --shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, 'Arial', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 12px;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+        
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+        
+        /* ===== HEADER ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+        .header .logo {
+            font-size: 22px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header .actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .header .actions button {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .header .actions button:hover {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+        }
+        .live-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--success);
+            color: #000;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* ===== STATS ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .stat-card {
+            background: var(--bg-secondary);
+            border-radius: 14px;
+            padding: 14px 16px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent);
+        }
+        .stat-card .icon { font-size: 26px; margin-bottom: 4px; }
+        .stat-card .number { font-size: 20px; font-weight: bold; color: var(--accent); }
+        .stat-card .label { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+        .stat-card.danger .number { color: var(--danger); }
+        .stat-card.success .number { color: var(--success); }
+        .stat-card.warning .number { color: var(--warning); }
+        
+        /* ===== TABS ===== */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-secondary);
+            border-radius: 14px;
+            padding: 4px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .tab-btn.active {
+            background: var(--accent);
+            color: #000;
+        }
+        .tab-btn:hover:not(.active) {
+            background: rgba(0, 212, 255, 0.1);
+        }
+        
+        /* ===== CONTENT ===== */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* ===== CARDS ===== */
+        .section {
+            background: var(--bg-secondary);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 14px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+        }
+        .section-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-title i { font-size: 18px; }
+        
+        /* ===== PLAN ITEMS ===== */
+        .plan-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .plan-item:last-child { border-bottom: none; }
+        .plan-item .name { font-weight: 600; font-size: 14px; }
+        .plan-item .price { font-size: 13px; color: var(--text-secondary); }
+        .plan-item .status-badge {
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .status-badge.available { background: rgba(68, 255, 136, 0.2); color: var(--success); }
+        .status-badge.unavailable { background: rgba(255, 68, 68, 0.2); color: var(--danger); }
+        
+        /* ===== ORDERS ===== */
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 13px;
+        }
+        .order-item:last-child { border-bottom: none; }
+        .order-item .user { font-weight: 600; }
+        .order-item .amount { color: var(--accent); }
+        
+        /* ===== AGENTS ===== */
+        .agent-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 13px;
+        }
+        .agent-item:last-child { border-bottom: none; }
+        .agent-item .name { font-weight: 600; }
+        .agent-item .badge {
+            background: var(--warning);
+            color: #000;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+        }
+        
+        /* ===== CHART WRAPPER ===== */
+        .chart-wrapper {
+            position: relative;
+            height: 180px;
+            margin: 10px 0;
+        }
+        
+        /* ===== ONLINE USERS ===== */
+        .online-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .online-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            color: #000;
+            margin: 0 auto;
+        }
+        .online-name {
+            text-align: center;
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        
+        /* ===== SEARCH ===== */
+        .search-box {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: 1px solid var(--accent);
+            box-shadow: var(--shadow);
+            font-size: 14px;
+            display: none;
+            z-index: 1000;
+            animation: slideUp 0.5s ease;
+        }
+        .toast.show { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
+        
+        /* ===== FOOTER ===== */
+        .footer {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 11px;
+            padding: 16px 0;
+            border-top: 1px solid var(--border-color);
+            margin-top: 10px;
+        }
+        
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .header .logo { font-size: 18px; }
+            .header .actions button { padding: 6px 10px; font-size: 14px; }
+            .stat-card .number { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== TOAST ===== -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ===== HEADER ===== -->
+    <div class="header">
+        <div>
+            <div class="logo">🎯 Jigar Tunnel</div>
+            <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">داشبورد مدیریت</div>
+        </div>
+        <div class="actions">
+            <span class="live-badge">● زنده</span>
+            <button onclick="toggleTheme()" title="تغییر تم"><i class="fas fa-moon"></i></button>
+            <button onclick="refreshData()" title="بروزرسانی"><i class="fas fa-sync"></i></button>
+        </div>
+    </div>
+
+    <!-- ===== STATS ===== -->
+    <div class="stats-grid" id="statsGrid">
+        <div class="stat-card"><div class="icon">👥</div><div class="number" id="totalUsers">0</div><div class="label">کاربران</div></div>
+        <div class="stat-card success"><div class="icon">🤝</div><div class="number" id="totalAgents">0</div><div class="label">نماینده‌ها</div></div>
+        <div class="stat-card warning"><div class="icon">🕒</div><div class="number" id="pendingOrders">0</div><div class="label">سفارشات در انتظار</div></div>
+        <div class="stat-card success"><div class="icon">✅</div><div class="number" id="doneOrders">0</div><div class="label">تکمیل شده</div></div>
+        <div class="stat-card"><div class="icon">💰</div><div class="number" id="totalSales">0</div><div class="label">فروش کل</div></div>
+        <div class="stat-card danger"><div class="icon">🎫</div><div class="number" id="openTickets">0</div><div class="label">تیکت باز</div></div>
+        <div class="stat-card danger"><div class="icon">⛔</div><div class="number" id="bannedUsers">0</div><div class="label">مسدود شده</div></div>
+        <div class="stat-card"><div class="icon">📈</div><div class="number" id="trafficCount">0</div><div class="label">افزایش ترافیک</div></div>
+    </div>
+
+    <!-- ===== TABS ===== -->
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="tab1">📊 خلاصه</button>
+        <button class="tab-btn" data-tab="tab2">📦 پلن‌ها</button>
+        <button class="tab-btn" data-tab="tab3">🤝 نماینده‌ها</button>
+        <button class="tab-btn" data-tab="tab4">📝 سفارشات</button>
+    </div>
+
+    <!-- ===== TAB 1: خلاصه ===== -->
+    <div class="tab-content active" id="tab1">
+        <div class="section">
+            <div class="section-title"><i class="fas fa-chart-pie"></i> نمودار فروش</div>
+            <div class="chart-wrapper">
+                <canvas id="salesChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title"><i class="fas fa-users"></i> کاربران آنلاین</div>
+            <div class="online-grid" id="onlineUsers">
+                <!-- JS میسازه -->
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title"><i class="fas fa-clock"></i> آخرین فعالیت‌ها</div>
+            <div id="recentActivities" style="font-size:13px; color:var(--text-secondary);">
+                در حال بارگذاری...
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TAB 2: پلن‌ها ===== -->
+    <div class="tab-content" id="tab2">
+        <div class="section">
+            <div class="section-title"><i class="fas fa-box"></i> وضعیت پلن‌ها</div>
+            <div id="plansList">
+                <div style="text-align:center; color:var(--text-secondary); padding:20px;">در حال بارگذاری...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TAB 3: نماینده‌ها ===== -->
+    <div class="tab-content" id="tab3">
+        <div class="section">
+            <div class="section-title"><i class="fas fa-user-tie"></i> درخواست‌های نمایندگی</div>
+            <div id="agentsList">
+                <div style="text-align:center; color:var(--text-secondary); padding:20px;">در حال بارگذاری...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TAB 4: سفارشات ===== -->
+    <div class="tab-content" id="tab4">
+        <div class="section">
+            <div class="section-title"><i class="fas fa-shopping-cart"></i> آخرین سفارشات</div>
+            <input class="search-box" id="searchOrder" placeholder="🔍 جستجوی کاربر..." oninput="filterOrders()">
+            <div id="ordersList">
+                <div style="text-align:center; color:var(--text-secondary); padding:20px;">در حال بارگذاری...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        © 2024 Jigar Tunnel | v3.0 🚀
+    </div>
+
+    <script>
+        // ===== DATA =====
+        let data = {
+            totalUsers: 1243,
+            totalAgents: 45,
+            pendingOrders: 12,
+            doneOrders: 890,
+            totalSales: 253000000,
+            openTickets: 3,
+            bannedUsers: 5,
+            trafficCount: 23,
+            plans: [
+                { name: '10 گیگ', price: 9000, available: true },
+                { name: '20 گیگ', price: 9000, available: true },
+                { name: '30 گیگ', price: 9000, available: false },
+                { name: '50 گیگ', price: 9000, available: true }
+            ],
+            agents: [
+                { name: 'علی محمدی', national: '۱۲۳۴۵۶۷۸۹۰', phone: '۰۹۱۲۳۴۵۶۷۸۹', sales: '۱۵ تا' },
+                { name: 'رضا کریمی', national: '۹۸۷۶۵۴۳۲۱۰', phone: '۰۹۱۹۸۷۶۵۴۳۲', sales: '۳۰ تا' },
+                { name: 'سارا احمدی', national: '۵۵۵۵۵۵۵۵۵۵', phone: '۰۹۰۱۲۳۴۵۶۷۸', sales: '۱۰ تا' }
+            ],
+            orders: [
+                { user: 'ارش صفری', plan: '۱۰ گیگ', amount: 90000, status: 'done' },
+                { user: 'نیما کریمی', plan: '۲۰ گیگ', amount: 180000, status: 'pending' },
+                { user: 'سارا رضایی', plan: '۵۰ گیگ', amount: 450000, status: 'done' },
+                { user: 'محمد حسینی', plan: '۳۰ گیگ', amount: 270000, status: 'paid' },
+                { user: 'زهرا محمدی', plan: '۱۰ گیگ', amount: 90000, status: 'pending' }
+            ],
+            onlineUsers: ['ارش', 'نیما', 'سارا', 'محمد', 'زهرا', 'رضا', 'علی', 'مهدی', 'حسن', 'فاطمه']
+        };
+
+        let chartInstance = null;
+
+        // ===== INIT =====
+        function init() {
+            updateStats();
+            updatePlans();
+            updateAgents();
+            updateOrders();
+            updateOnlineUsers();
+            updateActivities();
+            initChart();
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    document.getElementById(this.dataset.tab).classList.add('active');
+                });
+            });
+        }
+
+        // ===== UPDATE STATS =====
+        function updateStats() {
+            document.getElementById('totalUsers').textContent = formatNumber(data.totalUsers);
+            document.getElementById('totalAgents').textContent = formatNumber(data.totalAgents);
+            document.getElementById('pendingOrders').textContent = formatNumber(data.pendingOrders);
+            document.getElementById('doneOrders').textContent = formatNumber(data.doneOrders);
+            document.getElementById('totalSales').textContent = formatMoney(data.totalSales);
+            document.getElementById('openTickets').textContent = formatNumber(data.openTickets);
+            document.getElementById('bannedUsers').textContent = formatNumber(data.bannedUsers);
+            document.getElementById('trafficCount').textContent = formatNumber(data.trafficCount);
+        }
+
+        // ===== UPDATE PLANS =====
+        function updatePlans() {
+            let html = '';
+            data.plans.forEach(p => {
+                const status = p.available ? '✅ موجود' : '❌ ناموجود';
+                const cls = p.available ? 'available' : 'unavailable';
+                html += `
+                    <div class="plan-item">
+                        <div>
+                            <span class="name">📦 ${p.name}</span>
+                            <span class="price">${formatMoney(p.price * parseInt(p.name))}</span>
+                        </div>
+                        <span class="status-badge ${cls}">${status}</span>
+                    </div>
+                `;
+            });
+            document.getElementById('plansList').innerHTML = html;
+        }
+
+        // ===== UPDATE AGENTS =====
+        function updateAgents() {
+            let html = '';
+            if (data.agents.length === 0) {
+                html = '<div style="text-align:center; color:var(--text-secondary); padding:10px;">📭 هیچ درخواستی نیست</div>';
+            } else {
+                data.agents.forEach(a => {
+                    html += `
+                        <div class="agent-item">
+                            <div>
+                                <div class="name">👤 ${a.name}</div>
+                                <div style="font-size:12px; color:var(--text-secondary);">🆔 ${a.national} | 📞 ${a.phone}</div>
+                            </div>
+                            <span class="badge">📊 ${a.sales}</span>
+                        </div>
+                    `;
+                });
+            }
+            document.getElementById('agentsList').innerHTML = html;
+        }
+
+        // ===== UPDATE ORDERS =====
+        function updateOrders(filter = '') {
+            let html = '';
+            const filtered = data.orders.filter(o => o.user.includes(filter));
+            if (filtered.length === 0) {
+                html = '<div style="text-align:center; color:var(--text-secondary); padding:10px;">📭 سفارشی یافت نشد</div>';
+            } else {
+                filtered.forEach(o => {
+                    const statusMap = { 'done': '✅', 'pending': '🕒', 'paid': '💰' };
+                    html += `
+                        <div class="order-item">
+                            <div>
+                                <span class="user">${o.user}</span>
+                                <span style="color:var(--text-secondary); font-size:12px;"> ${o.plan}</span>
+                            </div>
+                            <div>
+                                <span class="amount">${formatMoney(o.amount)}</span>
+                                <span style="margin-left:8px; font-size:12px;">${statusMap[o.status] || '❓'}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            document.getElementById('ordersList').innerHTML = html;
+        }
+
+        function filterOrders() {
+            const val = document.getElementById('searchOrder').value;
+            updateOrders(val);
+        }
+
+        // ===== ONLINE USERS =====
+        function updateOnlineUsers() {
+            let html = '';
+            const colors = ['#00d4ff', '#44ff88', '#ffcc00', '#ff4444', '#aa66ff', '#ff66aa', '#66ffaa', '#ffaa66', '#66aaff', '#ff66ff'];
+            data.onlineUsers.forEach((name, i) => {
+                const initial = name.charAt(0);
+                html += `
+                    <div>
+                        <div class="online-avatar" style="background:${colors[i % colors.length]}">${initial}</div>
+                        <div class="online-name">${name}</div>
+                    </div>
+                `;
+            });
+            document.getElementById('onlineUsers').innerHTML = html;
+        }
+
+        // ===== ACTIVITIES =====
+        function updateActivities() {
+            const activities = [
+                '🟢 ارش صفری یک سرویس جدید خریداری کرد',
+                '💰 نیما کریمی کیف پول خود را شارژ کرد',
+                '✅ سفارش #1243 توسط ادمین تایید شد',
+                '📈 سارا رضایی ترافیک سرویس خود را افزایش داد',
+                '🆕 کاربر جدید محمد حسینی ثبت نام کرد'
+            ];
+            let html = '';
+            activities.forEach(a => {
+                html += `<div style="padding:6px 0; border-bottom:1px solid var(--border-color);">${a}</div>`;
+            });
+            document.getElementById('recentActivities').innerHTML = html;
+        }
+
+        // ===== CHART =====
+        function initChart() {
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['کیف پول', 'کارت به کارت', 'شارژ'],
+                    datasets: [{
+                        data: [45, 30, 25],
+                        backgroundColor: ['#00d4ff', '#44ff88', '#ffcc00'],
+                        borderColor: ['#0a0a1a', '#0a0a1a', '#0a0a1a'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            position: 'bottom',
+                            labels: { color: '#aaaaaa', font: { size: 12 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ===== TOGGLE THEME =====
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const icon = document.querySelector('.header .actions button i');
+            if (document.body.classList.contains('light-mode')) {
+                icon.className = 'fas fa-sun';
+            } else {
+                icon.className = 'fas fa-moon';
+            }
+            showToast('🌓 تم تغییر کرد');
+        }
+
+        // ===== REFRESH =====
+        function refreshData() {
+            showToast('🔄 در حال بروزرسانی...');
+            setTimeout(() => {
+                const newData = {...data};
+                newData.totalUsers += Math.floor(Math.random() * 5);
+                newData.pendingOrders += Math.floor(Math.random() * 3);
+                data = newData;
+                updateStats();
+                updatePlans();
+                updateOrders(document.getElementById('searchOrder').value || '');
+                showToast('✅ بروزرسانی انجام شد');
+            }, 800);
+        }
+
+        // ===== TOAST =====
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        // ===== HELPERS =====
+        function formatNumber(n) {
+            return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+        function formatMoney(n) {
+            if (n >= 1000000000) return (n / 1000000000).toFixed(1) + 'میلیارد';
+            if (n >= 1000000) return (n / 1000000).toFixed(1) + 'م';
+            return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' ت';
+        }
+
+        // ===== START =====
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
