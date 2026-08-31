@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
+<defs>
+ <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#55ff98"/><stop offset=".5" stop-color="#8c3cff"/><stop offset="1" stop-color="#d75cff"/></linearGradient>
+ <linearGradient id="m" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#10151b"/><stop offset="1" stop-color="#2a183e"/></linearGradient>
+ <filter id="s"><feDropShadow dx="0" dy="18" stdDeviation="15" flood-color="#000" flood-opacity=".55"/></filter>
+</defs>
+<circle cx="300" cy="300" r="278" fill="#090b10" stroke="url(#g)" stroke-width="18"/>
+<path d="M150 205 L205 130 L260 172 L300 108 L340 172 L395 130 L450 205 L415 470 Q300 530 185 470 Z" fill="url(#g)" filter="url(#s)"/>
+<path d="M171 223 L218 165 L263 199 L300 140 L337 199 L382 165 L429 223 L397 448 Q300 492 203 448 Z" fill="url(#m)" stroke="#0b0e13" stroke-width="10"/>
+<path d="M202 385 L252 195 L300 160 L348 195 L398 385 Q300 458 202 385Z" fill="#11131a"/>
+<path d="M237 347 L265 244 L300 213 L335 244 L363 347 L330 378 L300 347 L270 378Z" fill="url(#g)"/>
+<path d="M263 340 L280 276 L300 258 L320 276 L337 340 L300 324Z" fill="#0b0d12"/>
+<path d="M170 406 Q300 500 430 406" fill="none" stroke="#55ff98" stroke-width="10" opacity=".8"/>
+<text x="300" y="438" text-anchor="middle" font-family="Arial,sans-serif" font-size="48" font-weight="900" fill="white" letter-spacing="3">JT</text>
+</svg>
